@@ -17,19 +17,19 @@
 #ifndef FSCK_S3GW_SRC_CHECKS_H__
 #define FSCK_S3GW_SRC_CHECKS_H__
 
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
-
-#include <boost/filesystem.hpp>
 
 /* Fix - This is an abstract datatype representing an executable action to fix
  * an incosistency in the filesystem or metadata database.
  */
 class Fix {
-  public:
-    virtual operator std::string() const = 0;
-    virtual void fix() = 0;
+ public:
+  virtual ~Fix(){};
+  virtual operator std::string() const = 0;
+  virtual void fix() = 0;
 };
 
 /* Check - This is an abstract datatype representing exectutable action that
@@ -38,16 +38,16 @@ class Fix {
  * reported to the user.
  */
 class Check {
-  protected:
-    std::vector<std::shared_ptr<Fix>> fixes;
+ protected:
+  std::vector<std::shared_ptr<Fix>> fixes;
 
-  public:
-    virtual ~Check() {};
-    virtual int check() = 0;
-    void fix();
-    void show();
+ public:
+  virtual ~Check(){};
+  virtual int check() = 0;
+  void fix();
+  void show();
 };
 
-int run_checks(boost::filesystem::path, bool);
+int run_checks(std::filesystem::path, bool);
 
 #endif  // FSCK_S3GW_SRC_CHECKS_H__

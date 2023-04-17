@@ -27,37 +27,34 @@
 #ifndef FSCK_S3GW_SRC_CHECKS_ORPHANED_OBJECTS_H__
 #define FSCK_S3GW_SRC_CHECKS_ORPHANED_OBJECTS_H__
 
+#include <filesystem>
 #include <memory>
-
-#include <boost/filesystem.hpp>
 
 #include "checks.h"
 #include "sqlite.h"
 
-
 class OrphanedObjectsFix : public Fix {
-  private:
-    boost::filesystem::path root_path;
-    boost::filesystem::path obj_path;  // relative to root_path
+ private:
+  std::filesystem::path root_path;
+  std::filesystem::path obj_path;  // relative to root_path
 
-    std::string to_string() const;
+  std::string to_string() const;
 
-  public:
-    OrphanedObjectsFix(boost::filesystem::path, boost::filesystem::path);
-    operator std::string() const { return to_string(); };
-    void fix();
+ public:
+  OrphanedObjectsFix(std::filesystem::path, std::filesystem::path);
+  operator std::string() const { return to_string(); };
+  void fix();
 };
 
-
 class OrphanedObjectsCheck : public Check {
-  private:
-    boost::filesystem::path root_path;
-    std::unique_ptr<Database> metadata;
+ private:
+  std::filesystem::path root_path;
+  std::unique_ptr<Database> metadata;
 
-  public:
-    OrphanedObjectsCheck(boost::filesystem::path);
-    virtual ~OrphanedObjectsCheck() override;
-    virtual int check() override;
+ public:
+  OrphanedObjectsCheck(std::filesystem::path);
+  virtual ~OrphanedObjectsCheck() override;
+  virtual int check() override;
 };
 
 #endif  // FSCK_S3GW_SRC_CHECKS_ORPHANED_OBJECTS_H__

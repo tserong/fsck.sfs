@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-#include <iostream>
-#include <sqlite3.h>
-
 #include "sqlite.h"
 
+#include <sqlite3.h>
 
-Database::Database(boost::filesystem::path dbpath) {
+#include <filesystem>
+#include <iostream>
+
+Database::Database(std::filesystem::path dbpath) {
   db = dbpath;
 
   int rc = sqlite3_open(db.string().c_str(), &handle);
@@ -39,12 +40,13 @@ Database::~Database() {
  *
  *   SELECT COUNT(*) FROM table WHERE condition ;
  */
-auto Database::count_in_table(std::string table, std::string condition) -> int {
-  std::string query = "SELECT COUNT(*) FROM " + table + " WHERE " + condition + ";";
+int Database::count_in_table(std::string table, std::string condition) {
+  std::string query =
+      "SELECT COUNT(*) FROM " + table + " WHERE " + condition + ";";
   int count = 0;
   int rc = 0;
-  sqlite3_stmt *stm;
-  const char *unused = 0;
+  sqlite3_stmt* stm;
+  const char* unused = 0;
   rc = sqlite3_prepare(handle, query.c_str(), query.length(), &stm, &unused);
   if (rc != SQLITE_OK) {
     std::cout << "error while prepare: " << rc << std::endl;

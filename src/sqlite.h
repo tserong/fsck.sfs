@@ -18,20 +18,18 @@
  * C++ helper bindings for SQLite.
  */
 
-#include <string>
-
-#include <boost/filesystem.hpp>
 #include <sqlite3.h>
 
+#include <filesystem>
+#include <string>
 
 class Database {
-  private:
-    boost::filesystem::path db;
-    sqlite3 *handle;
-    int return_code;
+ private:
+  std::filesystem::path db;
+  sqlite3* handle;
 
-  public:
-    Database(boost::filesystem::path);
-    ~Database();
-    auto count_in_table(std::string, std::string) -> int;
+ public:
+  Database(std::filesystem::path);
+  ~Database();
+  int count_in_table(std::string, std::string);
 };

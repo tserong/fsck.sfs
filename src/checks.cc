@@ -14,16 +14,15 @@
  * limitations under the License.
 */
 
-#include <vector>
-#include <utility>
+#include "checks.h"
+
+#include <filesystem>
 #include <iostream>
 #include <memory>
+#include <utility>
+#include <vector>
 
-#include <boost/filesystem.hpp>
-
-#include "checks.h"
 #include "checks/orphaned_objects.h"
-
 
 void Check::fix() {
   for (std::shared_ptr<Fix> fix : fixes) {
@@ -37,8 +36,7 @@ void Check::show() {
   }
 }
 
-
-int run_checks(boost::filesystem::path path, bool should_fix) {
+int run_checks(std::filesystem::path path, bool should_fix) {
   int has_problem = 0;
 
   std::vector<std::shared_ptr<Check>> checks;

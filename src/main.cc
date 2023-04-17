@@ -24,27 +24,24 @@
  * state even in the event of unrecoverable errors.
 */
 
-#include <iostream>
-
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <filesystem>
+#include <iostream>
 
 #include "checks.h"
 
-
 #define FSCK_ASSERT(condition, message) \
-  if (!condition) { std::cerr << message << std::endl; return 1; }
+  if (!condition) {                     \
+    std::cerr << message << std::endl;  \
+    return 1;                           \
+  }
 
-
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
   boost::program_options::options_description desc("Allowed Options");
-  desc.add_options()
-    ("help,h", "print this help text")
-    ("fix,F", "fix any inconsistencies found")
-    ("path,p", boost::program_options::value< std::string >(), "path to check")
-    ("quiet,q", "run silently")
-    ("verbose,v", "more verbose output")
-  ;
+  desc.add_options()("help,h", "print this help text")(
+      "fix,F", "fix any inconsistencies found"
+  )("path,p", boost::program_options::value<std::string>(), "path to check"
+  )("quiet,q", "run silently")("verbose,v", "more verbose output");
 
   boost::program_options::positional_options_description p;
   p.add("path", -1);
@@ -52,8 +49,7 @@ int main(int argc, char *argv[]) {
   boost::program_options::variables_map options_map;
   boost::program_options::command_line_parser parser(argc, argv);
   boost::program_options::store(
-      parser.options(desc).positional(p).run(),
-      options_map
+      parser.options(desc).positional(p).run(), options_map
   );
   boost::program_options::notify(options_map);
 
@@ -64,16 +60,23 @@ int main(int argc, char *argv[]) {
   FSCK_ASSERT(options_map.count("path"), "Must supply path to check");
 
   std::string path_str(options_map["path"].as<std::string>());
-  boost::filesystem::path path_root(path_str);
-  boost::filesystem::path path_database = path_root / "s3gw.db";
-  boost::filesystem::path path_database_shm = path_root / "s3gw.db_tmp-shm";
-  boost::filesystem::path path_database_wal = path_root / "s3gw.db-wal";
+  std::filesystem::path path_root(path_str);
+  std::filesystem::path path_database = path_root / "s3gw.db";
+  std::filesystem::path path_database_shm = path_root / "s3gw.db_tmp-shm";
+  std::filesystem::path path_database_wal = path_root / "s3gw.db-wal";
 
-  FSCK_ASSERT(boost::filesystem::exists(path_root), "Path not found");
-  FSCK_ASSERT(boost::filesystem::is_directory(path_root), "Path must be a directory");
-  FSCK_ASSERT(boost::filesystem::exists(path_database), "Metadata database not found (is this an s3gw volume?)");
-  FSCK_ASSERT(boost::filesystem::is_regular_file(path_database), "Metadata database is not a regular file");
-  FSCK_ASSERT(!boost::filesystem::exists(path_database_wal), "Write-ahead-log found. Is another process using the database?");
+  FSCK_ASSERT(std::filesystem::exists(path_root), "Path not found");
+  FSCK_ASSERT(
+      std::filesystem::is_directory(path_root), "Path must be a directory"
+  );
+  FSCK_ASSERT(
+      std::filesystem::exists(path_database),
+      "Metadata database not found (is this an s3gw volume?)"
+  );
+  FSCK_ASSERT(
+      std::filesystem::is_regular_file(path_database),
+      "Metadata database is not a regular file"
+  );
 
   return run_checks(path_root, options_map.count("fix") > 0);
 }

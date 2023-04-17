@@ -14,32 +14,33 @@
  * limitations under the License.
 */
 
+#include "orphaned_objects.h"
+
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
+#include <boost/range/iterator_range.hpp>
+#include <filesystem>
 #include <iostream>
 #include <stack>
 
-#include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include "orphaned_objects.h"
-
-
 OrphanedObjectsFix::OrphanedObjectsFix(
-    boost::filesystem::path root,
-    boost::filesystem::path path){
+    std::filesystem::path root, std::filesystem::path path
+) {
   root_path = root;
   obj_path = path;
 }
 
 void OrphanedObjectsFix::fix() {
-  if (!boost::filesystem::exists(root_path / "lost+found")) {
-    boost::filesystem::create_directory(root_path / "lost+found");
+  if (!std::filesystem::exists(root_path / "lost+found" / obj_path)) {
+    std::filesystem::create_directories(root_path / "lost+found" / obj_path);
   }
 
-  boost::filesystem::rename(
-      root_path / *obj_path.begin(),
-      root_path / "lost+found" / *obj_path.begin());
+  for (auto& obj : std::filesystem::directory_iterator{root_path / obj_path}) {
+    std::filesystem::rename(
+        root_path / obj_path / obj.path(),
+        root_path / "lost+found" / obj_path / obj.path()
+    );
+  }
 }
 
 std::string OrphanedObjectsFix::to_string() const {
@@ -48,45 +49,45 @@ std::string OrphanedObjectsFix::to_string() const {
   return "orphaned object: " + oid + " at " + obj_path.string();
 }
 
-
-OrphanedObjectsCheck::OrphanedObjectsCheck(boost::filesystem::path path) {
+OrphanedObjectsCheck::OrphanedObjectsCheck(std::filesystem::path path) {
   root_path = path;
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
-OrphanedObjectsCheck::~OrphanedObjectsCheck() {
-}
+OrphanedObjectsCheck::~OrphanedObjectsCheck() {}
 
 int OrphanedObjectsCheck::check() {
   int orphan_count = 0;
-  std::stack<boost::filesystem::path> stack;
+  std::stack<std::filesystem::path> stack;
 
-  for (auto& entry : boost::make_iterator_range(
-                      boost::filesystem::directory_iterator(root_path), {})) {
+  for (auto& entry : std::filesystem::directory_iterator{root_path}) {
     // ignore lost+found
     if (entry.path().filename().string().compare("lost+found") == 0) {
       continue;
     }
 
-    if (boost::filesystem::is_directory(entry.path())) {
+    if (std::filesystem::is_directory(entry.path())) {
       stack.push(entry.path());
     }
   }
 
-  while(!stack.empty()) {
-    boost::filesystem::path cwd = stack.top();
+  while (!stack.empty()) {
+    std::filesystem::path cwd = stack.top();
     stack.pop();
 
-    for (auto& entry : boost::make_iterator_range(
-                        boost::filesystem::directory_iterator(cwd), {})) {
-      if (boost::filesystem::is_directory(entry.path())) {
+    for (auto& entry : std::filesystem::directory_iterator{cwd}) {
+      if (std::filesystem::is_directory(entry.path())) {
         stack.push(entry.path());
       } else {
-        boost::filesystem::path rel = boost::filesystem::relative(cwd, root_path);
+        std::filesystem::path rel = std::filesystem::relative(cwd, root_path);
         std::string uuid = rel.string();
         boost::erase_all(uuid, "/");
-        if (metadata->count_in_table("objects", "object_id = \"" + uuid + "\"") == 0) {
-          fixes.emplace_back(std::make_shared<OrphanedObjectsFix>(root_path, rel.string()));
+        if (metadata->count_in_table(
+                "objects", "object_id = \"" + uuid + "\""
+            ) == 0) {
+          fixes.emplace_back(
+              std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
+          );
           orphan_count++;
         }
       }
