@@ -23,13 +23,17 @@ set(SQLITE_COMPILE_FLAGS "-DSQLITE_THREADSAFE=1")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SQLITE_COMPILE_FLAGS}")
 
 add_compile_options(-Wall -Wextra)
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
 
-include_directories(src)
+include_directories(.)
 set(sources
-  src/main.cc
-  src/checks.cc
-  src/sqlite.cc
-  src/checks/orphaned_objects.cc)
+  main.cc
+  checks.cc
+  sqlite.cc
+  checks/metadata_schema_version.cc
+  checks/orphaned_metadata.cc
+  checks/orphaned_objects.cc)
 add_executable(${NAME} ${sources})
 target_compile_features(${NAME} PUBLIC cxx_std_17)
 target_link_libraries(${NAME} ${Boost_LIBRARIES})

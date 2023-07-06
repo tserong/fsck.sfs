@@ -40,7 +40,9 @@ int main(int argc, char* argv[]) {
   boost::program_options::options_description desc("Allowed Options");
   desc.add_options()("help,h", "print this help text")(
       "fix,F", "fix any inconsistencies found"
-  )("path,p", boost::program_options::value<std::string>(), "path to check"
+  )("ignore-uninitialized,I",
+    "don't return an error if the volume is uninitialized")(
+      "path,p", boost::program_options::value<std::string>(), "path to check"
   )("quiet,q", "run silently")("verbose,v", "more verbose output");
 
   boost::program_options::positional_options_description p;
@@ -69,14 +71,21 @@ int main(int argc, char* argv[]) {
   FSCK_ASSERT(
       std::filesystem::is_directory(path_root), "Path must be a directory"
   );
-  FSCK_ASSERT(
-      std::filesystem::exists(path_database),
-      "Metadata database not found (is this an s3gw volume?)"
-  );
-  FSCK_ASSERT(
-      std::filesystem::is_regular_file(path_database),
-      "Metadata database is not a regular file"
-  );
+
+  if (options_map.count("ignore-uninitialized") > 0) {
+    if (!std::filesystem::exists(path_database)) {
+      return 0;
+    }
+  } else {
+    FSCK_ASSERT(
+        std::filesystem::exists(path_database),
+        "Metadata database not found (is this an s3gw volume?)"
+    );
+    FSCK_ASSERT(
+        std::filesystem::is_regular_file(path_database),
+        "Metadata database is not a regular file"
+    );
+  }
 
   return run_checks(path_root, options_map.count("fix") > 0);
 }

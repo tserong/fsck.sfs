@@ -18,18 +18,28 @@
  * C++ helper bindings for SQLite.
  */
 
+#ifndef FSCK_S3GW_SRC_SQLITE_H__
+#define FSCK_S3GW_SRC_SQLITE_H__
+
 #include <sqlite3.h>
 
 #include <filesystem>
 #include <string>
+#include <vector>
 
 class Database {
  private:
   std::filesystem::path db;
-  sqlite3* handle;
 
  public:
+  sqlite3* handle;
   Database(std::filesystem::path);
   ~Database();
+
+  int prepare(std::string, sqlite3_stmt**);
+
   int count_in_table(std::string, std::string);
+  std::vector<std::string> select_from_table(std::string, std::string);
 };
+
+#endif  // FSCK_S3GW_SRC_SQLITE_H__

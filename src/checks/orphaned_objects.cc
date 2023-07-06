@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "orphaned_objects.h"
 
@@ -31,15 +31,27 @@ OrphanedObjectsFix::OrphanedObjectsFix(
 }
 
 void OrphanedObjectsFix::fix() {
-  if (!std::filesystem::exists(root_path / "lost+found" / obj_path)) {
-    std::filesystem::create_directories(root_path / "lost+found" / obj_path);
+  if (!std::filesystem::exists(
+          root_path / "lost+found" / obj_path.parent_path()
+      )) {
+    std::filesystem::create_directories(
+        root_path / "lost+found" / obj_path.parent_path()
+    );
   }
 
-  for (auto& obj : std::filesystem::directory_iterator{root_path / obj_path}) {
-    std::filesystem::rename(
-        root_path / obj_path / obj.path(),
-        root_path / "lost+found" / obj_path / obj.path()
-    );
+  std::filesystem::rename(
+      root_path / obj_path, root_path / "lost+found" / obj_path
+  );
+
+  // remove directories above if no object remains
+  if (std::filesystem::is_empty(root_path / obj_path.parent_path())) {
+    std::filesystem::remove(root_path / obj_path.parent_path());
+  }
+
+  if (std::filesystem::is_empty(
+          root_path / obj_path.parent_path().parent_path()
+      )) {
+    std::filesystem::remove(root_path / obj_path.parent_path().parent_path());
   }
 }
 
@@ -79,12 +91,11 @@ int OrphanedObjectsCheck::check() {
       if (std::filesystem::is_directory(entry.path())) {
         stack.push(entry.path());
       } else {
-        std::filesystem::path rel = std::filesystem::relative(cwd, root_path);
+        std::filesystem::path rel =
+            std::filesystem::relative(cwd / entry.path(), root_path);
         std::string uuid = rel.string();
         boost::erase_all(uuid, "/");
-        if (metadata->count_in_table(
-                "objects", "object_id = \"" + uuid + "\""
-            ) == 0) {
+        if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") == 0) {
           fixes.emplace_back(
               std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
           );

@@ -35,6 +35,17 @@ Database::~Database() {
   sqlite3_close(handle);
 }
 
+int Database::prepare(std::string query, sqlite3_stmt** stm) {
+  int rc = 0;
+  const char* unused = 0;
+  rc = sqlite3_prepare(handle, query.c_str(), query.length(), stm, &unused);
+  if (rc != SQLITE_OK) {
+    std::cout << "error while prepare: " << rc << std::endl;
+    std::cout << query << std::endl;
+  }
+  return rc;
+}
+
 /* Count in Table - Count number of rows in named table where the condition
  * is true. Translates directly into:
  *
@@ -59,4 +70,32 @@ int Database::count_in_table(std::string table, std::string condition) {
   }
   sqlite3_finalize(stm);
   return count;
+}
+
+/* Select from Table - Get all non-null entries of one column from a table.
+ * Translates into:
+ *
+ *   SELECT column FROM table WHERE column IS NOT NULL ;
+ */
+std::vector<std::string> Database::select_from_table(
+    std::string table, std::string column
+) {
+  std::string query = "SELECT " + column + " FROM " + table + " WHERE " +
+                      column + " IS NOT NULL;";
+  int rc = 0;
+  sqlite3_stmt* stm;
+  const char* unused = 0;
+  std::vector<std::string> result;
+  rc = sqlite3_prepare(handle, query.c_str(), query.length(), &stm, &unused);
+  if (rc != SQLITE_OK) {
+    std::cout << "error while prepare: " << rc << std::endl;
+    std::cout << query << std::endl;
+    return result;
+  }
+  do {
+    rc = sqlite3_step(stm);
+
+  } while (rc == SQLITE_ROW);
+  sqlite3_finalize(stm);
+  return result;
 }
