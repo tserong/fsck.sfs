@@ -30,7 +30,7 @@ Build the tool with CMake:
 
 ```shell
 cd fsck.s3gw
-cmake -B build
+cmake -S src -B build
 cmake --build build
 ```
 

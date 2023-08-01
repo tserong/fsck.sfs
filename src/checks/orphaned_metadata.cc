@@ -42,15 +42,28 @@ std::string OrphanedMetadataFix::to_string() const {
 OrphanedMetadataCheck::OrphanedMetadataCheck(std::filesystem::path path) {
   root_path = path;
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
-  std::string query = "SELECT uuid FROM objects WHERE uuid IS NOT NULL;";
-  int rc = 0;
-  sqlite3_stmt* stm;
-  const char* unused = 0;
 }
 
 OrphanedMetadataCheck::~OrphanedMetadataCheck() {}
 
 int OrphanedMetadataCheck::check() {
   int orphan_count = 0;
+  std::string query = "SELECT uuid FROM objects WHERE uuid IS NOT NULL;";
+  int rc = 0;
+  sqlite3_stmt* stm;
+
+  rc = metadata->prepare(query, &stm);
+  if (rc != SQLITE_OK) {
+    return rc;
+  }
+
+  rc = sqlite3_step(stm);
+  while (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
+    std::cout << "checking metadata: " << sqlite3_column_text(stm, 0)
+              << std::endl;
+    rc = sqlite3_step(stm);
+  }
+  sqlite3_finalize(stm);
+
   return orphan_count != 0 ? 1 : 0;
 }

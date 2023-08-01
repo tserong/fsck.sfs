@@ -93,7 +93,9 @@ int OrphanedObjectsCheck::check() {
       } else {
         std::filesystem::path rel =
             std::filesystem::relative(cwd / entry.path(), root_path);
-        std::string uuid = rel.string();
+        std::filesystem::path uuid_path =
+            std::filesystem::relative(cwd, root_path);
+        std::string uuid = uuid_path.string();
         boost::erase_all(uuid, "/");
         if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") == 0) {
           fixes.emplace_back(
