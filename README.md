@@ -34,4 +34,22 @@ cmake -S src -B build
 cmake --build build
 ```
 
+Run the tool you just built:
+
+```shell
+build/fsck.s3gw /path/to/s3gw/store
+```
+
+Or, build and run it in a container using Docker or Podman:
+
+```shell
+# Docker
+docker build -t fsck.s3gw .
+docker run -v /path/to/s3gw/store:/volume fsck.s3gw /volume
+
+# Podman
+podman build -t fsck.s3gw .
+podman run -v /path/to/s3gw/store:/volume fsck.s3gw /volume
+```
+
 [1]: https://s3gw.io
