@@ -29,6 +29,7 @@
 #include <iostream>
 
 #include "checks.h"
+#include "sqlite.h"
 
 #define FSCK_ASSERT(condition, message) \
   if (!condition) {                     \
@@ -84,6 +85,10 @@ int main(int argc, char* argv[]) {
     FSCK_ASSERT(
         std::filesystem::is_regular_file(path_database),
         "Metadata database is not a regular file"
+    );
+    Database db(path_database);
+    FSCK_ASSERT(db.check_integrity(),
+        "Database integrity check failed"
     );
   }
 
