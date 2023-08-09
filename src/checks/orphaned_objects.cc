@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <iostream>
 #include <stack>
+#include <regex>
 
 OrphanedObjectsFix::OrphanedObjectsFix(
     std::filesystem::path root, std::filesystem::path path
@@ -91,16 +92,34 @@ int OrphanedObjectsCheck::check() {
       if (std::filesystem::is_directory(entry.path())) {
         stack.push(entry.path());
       } else {
-        std::filesystem::path rel =
-            std::filesystem::relative(cwd / entry.path(), root_path);
-        std::filesystem::path uuid_path =
-            std::filesystem::relative(cwd, root_path);
-        std::string uuid = uuid_path.string();
-        boost::erase_all(uuid, "/");
-        if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") == 0) {
-          fixes.emplace_back(
-              std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
-          );
+        std::string filename(entry.path().filename());
+        std::smatch match;
+        if (std::regex_match(filename, match, std::regex("^[0-9]+$"))) {
+          // It's a versioned object (their names are just integers)
+          // TODO: verify each version isn't orphaned
+          std::filesystem::path rel =
+              std::filesystem::relative(cwd / entry.path(), root_path);
+          std::filesystem::path uuid_path =
+              std::filesystem::relative(cwd, root_path);
+          std::string uuid = uuid_path.string();
+          boost::erase_all(uuid, "/");
+          if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") == 0) {
+            fixes.emplace_back(
+                std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
+            );
+            orphan_count++;
+          }
+        } else if (std::regex_match(filename, match,
+                   std::regex("^(([[:xdigit:]]{4}-){4}[[:xdigit:]]{12})-([0-9]+)$"))) {
+          // It's a multipart part.  Their names are "$uuid_tail-$part_number",
+          // e.g.: "6c78-0c22-4c51-9a2b-4284724edd64-1"
+          // match[1] == uuid tail
+          // match[3] == multipart part number
+          // TODO: Implement orphaned multipart Fix class
+        } else {
+          // This is something else
+          // TODO: Implement this as a Fix class
+          std::cout << "Found unexpected mystery file: " << entry.path().string() << std::endl;
           orphan_count++;
         }
       }
