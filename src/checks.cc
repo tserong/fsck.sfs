@@ -54,5 +54,8 @@ int run_checks(std::filesystem::path path, bool should_fix) {
     }
   }
 
+  if (!has_problem) {
+    std::cout << "Everything's cool." << std::endl;
+  }
   return has_problem;
 }
