@@ -33,7 +33,8 @@ set(sources
   sqlite.cc
   checks/metadata_schema_version.cc
   checks/orphaned_metadata.cc
-  checks/orphaned_objects.cc)
+  checks/orphaned_objects.cc
+  checks/object_integrity.cc)
 add_executable(${NAME} ${sources})
 target_compile_features(${NAME} PUBLIC cxx_std_17)
 target_link_libraries(${NAME} ${Boost_LIBRARIES})

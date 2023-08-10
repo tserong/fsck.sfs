@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "checks/metadata_schema_version.h"
+#include "checks/object_integrity.h"
 #include "checks/orphaned_metadata.h"
 #include "checks/orphaned_objects.h"
 
@@ -48,6 +49,7 @@ int run_checks(std::filesystem::path path, bool should_fix) {
   checks.emplace_back(std::make_shared<MetadataSchemaVersionCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedObjectsCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedMetadataCheck>(path));
+  checks.emplace_back(std::make_shared<ObjectIntegrityCheck>(path));
 
   for (std::shared_ptr<Check> check : checks) {
     has_problem = check->check() == 0 ? has_problem : 1;
