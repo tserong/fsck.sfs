@@ -38,26 +38,34 @@
   }
 
 int main(int argc, char* argv[]) {
-  boost::program_options::options_description desc("Allowed Options");
-  desc.add_options()("help,h", "print this help text")(
-      "fix,F", "fix any inconsistencies found"
-  )("ignore-uninitialized,I",
-    "don't return an error if the volume is uninitialized")(
-      "path,p", boost::program_options::value<std::string>(), "path to check"
-  )("quiet,q", "run silently")("verbose,v", "more verbose output");
-
-  boost::program_options::positional_options_description p;
-  p.add("path", -1);
-
   boost::program_options::variables_map options_map;
-  boost::program_options::command_line_parser parser(argc, argv);
-  boost::program_options::store(
-      parser.options(desc).positional(p).run(), options_map
-  );
-  boost::program_options::notify(options_map);
+  try {
+    boost::program_options::options_description desc("Allowed Options");
+    desc.add_options()("help,h", "print this help text")(
+        "fix,F", "fix any inconsistencies found"
+    )("ignore-uninitialized,I",
+      "don't return an error if the volume is uninitialized")(
+        "path,p", boost::program_options::value<std::string>(), "path to check"
+    )("quiet,q", "run silently")("verbose,v", "more verbose output");
 
-  if (options_map.count("help")) {
-    std::cout << desc << std::endl;
+    boost::program_options::positional_options_description p;
+    p.add("path", -1);
+
+    boost::program_options::command_line_parser parser(argc, argv);
+    boost::program_options::store(
+        parser.options(desc).positional(p).run(), options_map
+    );
+    boost::program_options::notify(options_map);
+
+    if (options_map.count("help")) {
+      std::cout << desc << std::endl;
+      return 0;
+    }
+  }
+  catch (const boost::program_options::error & ex) {
+    // This will happen if you try to invoke with an unrecognised option
+    std::cerr << ex.what() << std::endl;
+    return 1;
   }
 
   FSCK_ASSERT(options_map.count("path"), "Must supply path to check");
