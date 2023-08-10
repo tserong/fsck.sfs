@@ -32,6 +32,7 @@ OrphanedObjectsFix::OrphanedObjectsFix(
 }
 
 void OrphanedObjectsFix::fix() {
+  // TODO: print a message of what was actually done when the fix was applied!
   if (!std::filesystem::exists(
           root_path / "lost+found" / obj_path.parent_path()
       )) {
@@ -60,6 +61,21 @@ std::string OrphanedObjectsFix::to_string() const {
   std::string oid = obj_path.string();
   boost::erase_all(oid, "/");
   return "orphaned object: " + oid + " at " + obj_path.string();
+}
+
+UnexpectedFileFix::UnexpectedFileFix(
+    std::filesystem::path root, std::filesystem::path path
+) {
+  root_path = root;
+  obj_path = path;
+}
+
+void UnexpectedFileFix::fix() {
+  // TODO: do we really want to move unexpected files to lost+found?
+}
+
+std::string UnexpectedFileFix::to_string() const {
+  return "Found unexpected mystery file: " + obj_path.string();
 }
 
 OrphanedObjectsCheck::OrphanedObjectsCheck(std::filesystem::path path) {
@@ -93,12 +109,12 @@ int OrphanedObjectsCheck::check() {
         stack.push(entry.path());
       } else {
         std::string filename(entry.path().filename());
+        std::filesystem::path rel =
+            std::filesystem::relative(cwd / entry.path(), root_path);
         std::smatch match;
         if (std::regex_match(filename, match, std::regex("^[0-9]+$"))) {
           // It's a versioned object (their names are just integers)
           // TODO: verify each version isn't orphaned
-          std::filesystem::path rel =
-              std::filesystem::relative(cwd / entry.path(), root_path);
           std::filesystem::path uuid_path =
               std::filesystem::relative(cwd, root_path);
           std::string uuid = uuid_path.string();
@@ -115,11 +131,45 @@ int OrphanedObjectsCheck::check() {
           // e.g.: "6c78-0c22-4c51-9a2b-4284724edd64-1"
           // match[1] == uuid tail
           // match[3] == multipart part number
-          // TODO: Implement orphaned multipart Fix class
+          std::filesystem::path uuid_base =
+              std::filesystem::relative(cwd, root_path);
+          std::string uuid = uuid_base.string() + std::string(match[1]);
+          boost::erase_all(uuid, "/");
+          std::string part_num = std::string(match[3]);
+
+          std::string query =
+            "SELECT COUNT(part_num) FROM multiparts_parts, multiparts "
+            "WHERE multiparts_parts.upload_id = multiparts.upload_id AND "
+            "      part_num = " + part_num + " AND "
+            "      object_uuid = '" + uuid + "'";
+          sqlite3_stmt* stm;
+          if (metadata->prepare(query, &stm) == SQLITE_OK) {
+            if (sqlite3_step(stm) == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
+              int count = sqlite3_column_int(stm, 0);
+              if (count == 0) {
+                fixes.emplace_back(
+                    // TODO: Consider making an OrphanedMultipartFix class.
+                    // OrphanedOjectsFix works fine, but the messaging might
+                    // be slightly misleading ("orphaned object: uuid-n ..."
+                    // vs. what would be "orhpaned multipart part: ...")
+                    std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
+                );
+                orphan_count++;
+              }
+            } else {
+              std::cout << "This can't happen" << std::endl;
+              // TODO: You sure about that bro?
+            }
+            sqlite3_finalize(stm);
+          } else {
+            std::cout << "This shouldn't happen" << std::endl;
+            // TODO: What?  Seriously?  Do better with the error handling.
+          }
         } else {
           // This is something else
-          // TODO: Implement this as a Fix class
-          std::cout << "Found unexpected mystery file: " << entry.path().string() << std::endl;
+          fixes.emplace_back(
+            std::make_shared<UnexpectedFileFix>(root_path, rel.string())
+          );
           orphan_count++;
         }
       }
