@@ -35,8 +35,7 @@ OrphanedMetadataFix::OrphanedMetadataFix(
 void OrphanedMetadataFix::fix() {}
 
 std::string OrphanedMetadataFix::to_string() const {
-  std::string uuid = obj_path.string();
-  return "orphaned metadata: " + uuid;
+  return "orphaned metadata: " + obj_path.string();
 }
 
 OrphanedMetadataCheck::OrphanedMetadataCheck(std::filesystem::path path) {
@@ -48,7 +47,10 @@ OrphanedMetadataCheck::~OrphanedMetadataCheck() {}
 
 int OrphanedMetadataCheck::check() {
   int orphan_count = 0;
-  std::string query = "SELECT uuid FROM objects WHERE uuid IS NOT NULL;";
+  // TODO: Should we do a join here with the objects table in order
+  // to get bucket id and object name for display purposes if something
+  // is broken?
+  std::string query = "SELECT object_id, id FROM versioned_objects WHERE object_id IS NOT NULL;";
   int rc = 0;
   sqlite3_stmt* stm;
 
@@ -59,8 +61,19 @@ int OrphanedMetadataCheck::check() {
 
   rc = sqlite3_step(stm);
   while (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
-    std::cout << "checking metadata: " << sqlite3_column_text(stm, 0)
-              << std::endl;
+    std::string uuid{reinterpret_cast<const char *>(sqlite3_column_text(stm, 0))};
+    std::string id{reinterpret_cast<const char *>(sqlite3_column_text(stm, 1))};
+    // first/second/fname logic lifted from s3gw's UUIDPath class
+    std::filesystem::path first = uuid.substr(0, 2);
+    std::filesystem::path second = uuid.substr(2, 2);
+    std::filesystem::path fname = uuid.substr(4);
+    std::filesystem::path obj_path = first / second / fname / id;
+    if (!(std::filesystem::exists(root_path / obj_path) && std::filesystem::is_regular_file(root_path / obj_path))) {
+      fixes.emplace_back(
+          std::make_shared<OrphanedMetadataFix>(root_path, obj_path)
+      );
+      orphan_count++;
+    }
     rc = sqlite3_step(stm);
   }
   sqlite3_finalize(stm);
