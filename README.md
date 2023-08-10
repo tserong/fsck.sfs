@@ -19,9 +19,12 @@ Must supply path to check.
 ## Checks
 
 <!-- markdownlint-disable line-length-->
-| Check            | Fix                                             | Description                                         |
-| ---------------- | ----------------------------------------------- | --------------------------------------------------- |
-| orphaned objects | move orphaned objects to "lost+found" directory | locates objects that are not listed in the metadata |
+| Check              | Fix                                             | Description                                              |
+| ------------------ | ----------------------------------------------- | -------------------------------------------------------- |
+| metadata integrity | N/A                                             | runs sqlite integrity check on metadata                  |
+| metadata version   | N/A                                             | checks metadata schema version is supported by fsck.s3gw |
+| orphaned objects   | move orphaned objects to "lost+found" directory | locates objects that are not listed in the metadata      |
+| orphaned metadata  | unimplemented                                   | locates metadata for which objects don't actually exist  |
 <!-- markdownlint-restore -->
 
 ## Development

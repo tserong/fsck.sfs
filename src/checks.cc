@@ -42,6 +42,9 @@ int run_checks(std::filesystem::path path, bool should_fix) {
   int has_problem = 0;
 
   std::vector<std::shared_ptr<Check>> checks;
+  // TODO: consider which of these checks should abort the entire process.
+  // I'm thinking in particular here of the metadata schema version check
+  // because if that fails, subsequent checks might not be valid.
   checks.emplace_back(std::make_shared<MetadataSchemaVersionCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedObjectsCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedMetadataCheck>(path));
