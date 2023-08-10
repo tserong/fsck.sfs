@@ -61,8 +61,7 @@ int main(int argc, char* argv[]) {
       std::cout << desc << std::endl;
       return 0;
     }
-  }
-  catch (const boost::program_options::error & ex) {
+  } catch (const boost::program_options::error& ex) {
     // This will happen if you try to invoke with an unrecognised option
     std::cerr << ex.what() << std::endl;
     return 1;
@@ -95,9 +94,7 @@ int main(int argc, char* argv[]) {
         "Metadata database is not a regular file"
     );
     Database db(path_database);
-    FSCK_ASSERT(db.check_integrity(),
-        "Database integrity check failed"
-    );
+    FSCK_ASSERT(db.check_integrity(), "Database integrity check failed");
   }
 
   return run_checks(path_root, options_map.count("fix") > 0);

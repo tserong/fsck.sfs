@@ -18,10 +18,10 @@
 
 #include <sqlite3.h>
 
+#include <cassert>
+#include <cstring>
 #include <filesystem>
 #include <iostream>
-#include <cstring>
-#include <cassert>
 
 Database::Database(std::filesystem::path dbpath) {
   db = dbpath;
@@ -38,11 +38,10 @@ Database::~Database() {
 }
 
 bool Database::check_integrity() {
-
-  auto callback = [](void * arg, int num_columns, char ** column_data, char **) {
+  auto callback = [](void* arg, int num_columns, char** column_data, char**) {
     assert(num_columns == 1);
     if (std::strcmp(column_data[0], "ok") == 0) {
-      *(static_cast<bool *>(arg)) = true;
+      *(static_cast<bool*>(arg)) = true;
     } else {
       std::cout << column_data[0] << std::endl;
     }
@@ -52,14 +51,17 @@ bool Database::check_integrity() {
   bool is_ok = false;
   // This will return up to 100 error rows by default.  For more details see
   // https://www.sqlite.org/pragma.html#pragma_integrity_check
-  int rc = sqlite3_exec(handle, "PRAGMA integrity_check",
-    callback, static_cast<void *>(&is_ok), NULL);
+  int rc = sqlite3_exec(
+      handle, "PRAGMA integrity_check", callback, static_cast<void*>(&is_ok),
+      NULL
+  );
   if (rc != SQLITE_OK) {
     // This will happen if the file is _so_ trashed it doesn't even
     // look like an SQLite database.  Here you'll see things like:
     // - file is not a database (26)
     // - database disk image is malformed (11)
-    std::cout << "sqlite3_exec error: " << sqlite3_errstr(rc) << " (" << rc << ")" << std::endl;
+    std::cout << "sqlite3_exec error: " << sqlite3_errstr(rc) << " (" << rc
+              << ")" << std::endl;
   }
 
   return is_ok;

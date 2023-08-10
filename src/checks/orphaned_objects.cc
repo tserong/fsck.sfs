@@ -21,8 +21,8 @@
 #include <boost/range/iterator_range.hpp>
 #include <filesystem>
 #include <iostream>
-#include <stack>
 #include <regex>
+#include <stack>
 
 OrphanedObjectsFix::OrphanedObjectsFix(
     std::filesystem::path root, std::filesystem::path path
@@ -119,14 +119,19 @@ int OrphanedObjectsCheck::check() {
               std::filesystem::relative(cwd, root_path);
           std::string uuid = uuid_path.string();
           boost::erase_all(uuid, "/");
-          if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") == 0) {
+          if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") ==
+              0) {
             fixes.emplace_back(
                 std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
             );
             orphan_count++;
           }
-        } else if (std::regex_match(filename, match,
-                   std::regex("^(([[:xdigit:]]{4}-){4}[[:xdigit:]]{12})-([0-9]+)$"))) {
+        } else if (std::regex_match(
+                       filename, match,
+                       std::regex(
+                           "^(([[:xdigit:]]{4}-){4}[[:xdigit:]]{12})-([0-9]+)$"
+                       )
+                   )) {
           // It's a multipart part.  Their names are "$uuid_tail-$part_number",
           // e.g.: "6c78-0c22-4c51-9a2b-4284724edd64-1"
           // match[1] == uuid tail
@@ -138,13 +143,17 @@ int OrphanedObjectsCheck::check() {
           std::string part_num = std::string(match[3]);
 
           std::string query =
-            "SELECT COUNT(part_num) FROM multiparts_parts, multiparts "
-            "WHERE multiparts_parts.upload_id = multiparts.upload_id AND "
-            "      part_num = " + part_num + " AND "
-            "      object_uuid = '" + uuid + "'";
+              "SELECT COUNT(part_num) FROM multiparts_parts, multiparts "
+              "WHERE multiparts_parts.upload_id = multiparts.upload_id AND "
+              "      part_num = " +
+              part_num +
+              " AND "
+              "      object_uuid = '" +
+              uuid + "'";
           sqlite3_stmt* stm;
           if (metadata->prepare(query, &stm) == SQLITE_OK) {
-            if (sqlite3_step(stm) == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
+            if (sqlite3_step(stm) == SQLITE_ROW &&
+                sqlite3_column_count(stm) > 0) {
               int count = sqlite3_column_int(stm, 0);
               if (count == 0) {
                 fixes.emplace_back(
@@ -152,7 +161,9 @@ int OrphanedObjectsCheck::check() {
                     // OrphanedOjectsFix works fine, but the messaging might
                     // be slightly misleading ("orphaned object: uuid-n ..."
                     // vs. what would be "orhpaned multipart part: ...")
-                    std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
+                    std::make_shared<OrphanedObjectsFix>(
+                        root_path, rel.string()
+                    )
                 );
                 orphan_count++;
               }
@@ -168,7 +179,7 @@ int OrphanedObjectsCheck::check() {
         } else {
           // This is something else
           fixes.emplace_back(
-            std::make_shared<UnexpectedFileFix>(root_path, rel.string())
+              std::make_shared<UnexpectedFileFix>(root_path, rel.string())
           );
           orphan_count++;
         }
