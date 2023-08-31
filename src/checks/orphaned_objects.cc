@@ -119,9 +119,10 @@ int OrphanedObjectsCheck::check() {
         auto name_is_numeric = std::all_of(stem.begin(), stem.end(), ::isdigit);
         if (name_is_numeric && entry.path().extension() == ".v") {
           // It's a versioned object
-          // TODO: verify each version isn't orphaned
-          if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") ==
-              0) {
+          if (metadata->count_in_table(
+                  "versioned_objects",
+                  "object_id=\"" + uuid + "\" AND id=" + stem
+              ) == 0) {
             fixes.emplace_back(
                 std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
             );
