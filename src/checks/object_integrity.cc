@@ -74,23 +74,27 @@ int ObjectIntegrityCheck::check() {
     std::filesystem::path fname = uuid.substr(4);
     std::filesystem::path obj_path = first / second / fname / id;
 
-    // This assumes the files exist (OrphanedMetadataCheck has already
-    // been run, right?) -- if the file somehow *doesn't* exist at this
-    // point, a std::filesystem::filesystem_error will be thrown but
-    // nothing will catch it, so the program will abort and dump core.
-    std::uintmax_t file_size = std::filesystem::file_size(root_path / obj_path);
-    if (file_size != object_size) {
-      fixes.emplace_back(std::make_shared<ObjectIntegrityFix>(
-          root_path, obj_path,
-          std::string(
-              "size mismatch (got " + std::to_string(file_size) +
-              ", expected " + std::to_string(object_size) + ")"
-          )
-      ));
-      fail_count++;
-    }
+    // Have to check the file exists first (it won't exist if it's
+    // orphaned metadata, but as all checks run independently of
+    // each other, we have to re-check here - this is another argument
+    // for folding the integrity check into the orphaned metadata check)
+    if (std::filesystem::exists(root_path / obj_path) &&
+        std::filesystem::is_regular_file(root_path / obj_path)) {
+      std::uintmax_t file_size =
+          std::filesystem::file_size(root_path / obj_path);
+      if (file_size != object_size) {
+        fixes.emplace_back(std::make_shared<ObjectIntegrityFix>(
+            root_path, obj_path,
+            std::string(
+                "size mismatch (got " + std::to_string(file_size) +
+                ", expected " + std::to_string(object_size) + ")"
+            )
+        ));
+        fail_count++;
+      }
 
-    // TODO: implement checksum check
+      // TODO: implement checksum check
+    }
 
     rc = sqlite3_step(stm);
   }
