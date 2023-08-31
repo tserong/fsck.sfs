@@ -112,8 +112,9 @@ int OrphanedObjectsCheck::check() {
         std::filesystem::path rel =
             std::filesystem::relative(cwd / entry.path(), root_path);
         std::smatch match;
-        if (std::regex_match(filename, match, std::regex("^[0-9]+$"))) {
-          // It's a versioned object (their names are just integers)
+        if (std::regex_match(filename, match, std::regex("^[0-9]+\\.v$"))) {
+          // It's a versioned object (their names are integers with ".v"
+          // appended)
           // TODO: verify each version isn't orphaned
           std::filesystem::path uuid_path =
               std::filesystem::relative(cwd, root_path);
@@ -127,20 +128,16 @@ int OrphanedObjectsCheck::check() {
             orphan_count++;
           }
         } else if (std::regex_match(
-                       filename, match,
-                       std::regex(
-                           "^(([[:xdigit:]]{4}-){4}[[:xdigit:]]{12})-([0-9]+)$"
-                       )
+                       filename, match, std::regex("^([0-9]+)\\.p$")
                    )) {
-          // It's a multipart part.  Their names are "$uuid_tail-$part_number",
-          // e.g.: "6c78-0c22-4c51-9a2b-4284724edd64-1"
-          // match[1] == uuid tail
-          // match[3] == multipart part number
-          std::filesystem::path uuid_base =
+          // It's a multipart part.  Their names are integers with ".p"
+          // appended)
+          // match[1] == part number
+          std::filesystem::path uuid_path =
               std::filesystem::relative(cwd, root_path);
-          std::string uuid = uuid_base.string() + std::string(match[1]);
+          std::string uuid = uuid_path.string();
           boost::erase_all(uuid, "/");
-          std::string part_num = std::string(match[3]);
+          std::string part_num = std::string(match[1]);
 
           std::string query =
               "SELECT COUNT(part_num) FROM multiparts_parts, multiparts "
@@ -148,7 +145,7 @@ int OrphanedObjectsCheck::check() {
               "      part_num = " +
               part_num +
               " AND "
-              "      object_uuid = '" +
+              "      path_uuid = '" +
               uuid + "'";
           sqlite3_stmt* stm;
           if (metadata->prepare(query, &stm) == SQLITE_OK) {

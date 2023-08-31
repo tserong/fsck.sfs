@@ -62,6 +62,7 @@ int ObjectIntegrityCheck::check() {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};
     std::string id{reinterpret_cast<const char*>(sqlite3_column_text(stm, 1))};
+    id.append(".v");
     std::string checksum{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 2))};
     std::uintmax_t object_size = sqlite3_column_int64(stm, 3);
@@ -74,7 +75,9 @@ int ObjectIntegrityCheck::check() {
     std::filesystem::path obj_path = first / second / fname / id;
 
     // This assumes the files exist (OrphanedMetadataCheck has already
-    // been run, right?)
+    // been run, right?) -- if the file somehow *doesn't* exist at this
+    // point, a std::filesystem::filesystem_error will be thrown but
+    // nothing will catch it, so the program will abort and dump core.
     std::uintmax_t file_size = std::filesystem::file_size(root_path / obj_path);
     if (file_size != object_size) {
       fixes.emplace_back(std::make_shared<ObjectIntegrityFix>(

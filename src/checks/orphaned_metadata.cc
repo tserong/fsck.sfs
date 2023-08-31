@@ -66,6 +66,7 @@ int OrphanedMetadataCheck::check() {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};
     std::string id{reinterpret_cast<const char*>(sqlite3_column_text(stm, 1))};
+    id.append(".v");
     // first/second/fname logic lifted from s3gw's UUIDPath class
     std::filesystem::path first = uuid.substr(0, 2);
     std::filesystem::path second = uuid.substr(2, 2);
