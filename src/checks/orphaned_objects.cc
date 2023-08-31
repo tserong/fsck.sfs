@@ -21,7 +21,6 @@
 #include <boost/range/iterator_range.hpp>
 #include <filesystem>
 #include <iostream>
-#include <regex>
 #include <stack>
 
 OrphanedObjectsFix::OrphanedObjectsFix(
@@ -108,18 +107,19 @@ int OrphanedObjectsCheck::check() {
       if (std::filesystem::is_directory(entry.path())) {
         stack.push(entry.path());
       } else {
-        std::string filename(entry.path().filename());
         std::filesystem::path rel =
             std::filesystem::relative(cwd / entry.path(), root_path);
-        std::smatch match;
-        if (std::regex_match(filename, match, std::regex("^[0-9]+\\.v$"))) {
-          // It's a versioned object (their names are integers with ".v"
-          // appended)
+
+        std::filesystem::path uuid_path =
+            std::filesystem::relative(cwd, root_path);
+        std::string uuid = uuid_path.string();
+        boost::erase_all(uuid, "/");
+
+        std::string stem(entry.path().stem());
+        auto name_is_numeric = std::all_of(stem.begin(), stem.end(), ::isdigit);
+        if (name_is_numeric && entry.path().extension() == ".v") {
+          // It's a versioned object
           // TODO: verify each version isn't orphaned
-          std::filesystem::path uuid_path =
-              std::filesystem::relative(cwd, root_path);
-          std::string uuid = uuid_path.string();
-          boost::erase_all(uuid, "/");
           if (metadata->count_in_table("objects", "uuid=\"" + uuid + "\"") ==
               0) {
             fixes.emplace_back(
@@ -127,23 +127,13 @@ int OrphanedObjectsCheck::check() {
             );
             orphan_count++;
           }
-        } else if (std::regex_match(
-                       filename, match, std::regex("^([0-9]+)\\.p$")
-                   )) {
-          // It's a multipart part.  Their names are integers with ".p"
-          // appended)
-          // match[1] == part number
-          std::filesystem::path uuid_path =
-              std::filesystem::relative(cwd, root_path);
-          std::string uuid = uuid_path.string();
-          boost::erase_all(uuid, "/");
-          std::string part_num = std::string(match[1]);
-
+        } else if (name_is_numeric && entry.path().extension() == ".p") {
+          // It's a multipart part
           std::string query =
               "SELECT COUNT(part_num) FROM multiparts_parts, multiparts "
               "WHERE multiparts_parts.upload_id = multiparts.upload_id AND "
               "      part_num = " +
-              part_num +
+              stem +
               " AND "
               "      path_uuid = '" +
               uuid + "'";
