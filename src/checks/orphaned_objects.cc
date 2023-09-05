@@ -58,6 +58,9 @@ void OrphanedObjectsFix::fix() {
 
 std::string OrphanedObjectsFix::to_string() const {
   std::string oid = obj_path.string();
+  // TODO: this stripping is wrong, because it prints:
+  // orphaned object: 353e5262-d525-42bd-a43a-876a0938b4842.p at 35/3e/5262-d525-42bd-a43a-876a0938b484/2.p
+  // (note how the 2.p is smooshed onto the end of the UUID?)
   boost::erase_all(oid, "/");
   return "orphaned object: " + oid + " at " + obj_path.string();
 }
@@ -131,9 +134,10 @@ int OrphanedObjectsCheck::check() {
         } else if (name_is_numeric && entry.path().extension() == ".p") {
           // It's a multipart part
           std::string query =
-              "SELECT COUNT(part_num) FROM multiparts_parts, multiparts "
+              "SELECT COUNT(multiparts_parts.id) FROM multiparts_parts, "
+              "multiparts "
               "WHERE multiparts_parts.upload_id = multiparts.upload_id AND "
-              "      part_num = " +
+              "      multiparts_parts.id = " +
               stem +
               " AND "
               "      path_uuid = '" +
