@@ -19,8 +19,8 @@
  * in the expected version
 */
 
-#ifndef FSCK_S3GW_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__
-#define FSCK_S3GW_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__
+#ifndef FSCK_SFS_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__
+#define FSCK_SFS_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__
 
 #include <filesystem>
 #include <memory>
@@ -54,4 +54,4 @@ class MetadataSchemaVersionCheck : public Check {
 
 const int EXPECTED_METADATA_SCHEMA_VERSION = 4;
 
-#endif  // FSCK_S3GW_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__
+#endif  // FSCK_SFS_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__

@@ -14,8 +14,8 @@
  * limitations under the License.
 */
 
-#ifndef FSCK_S3GW_SRC_CHECKS_H__
-#define FSCK_S3GW_SRC_CHECKS_H__
+#ifndef FSCK_SFS_SRC_CHECKS_H__
+#define FSCK_SFS_SRC_CHECKS_H__
 
 #include <filesystem>
 #include <memory>
@@ -50,4 +50,4 @@ class Check {
 
 int run_checks(std::filesystem::path, bool);
 
-#endif  // FSCK_S3GW_SRC_CHECKS_H__
+#endif  // FSCK_SFS_SRC_CHECKS_H__

@@ -18,8 +18,8 @@
  * C++ helper bindings for SQLite.
  */
 
-#ifndef FSCK_S3GW_SRC_SQLITE_H__
-#define FSCK_S3GW_SRC_SQLITE_H__
+#ifndef FSCK_SFS_SRC_SQLITE_H__
+#define FSCK_SFS_SRC_SQLITE_H__
 
 #include <sqlite3.h>
 
@@ -44,4 +44,4 @@ class Database {
   std::vector<std::string> select_from_table(std::string, std::string);
 };
 
-#endif  // FSCK_S3GW_SRC_SQLITE_H__
+#endif  // FSCK_SFS_SRC_SQLITE_H__

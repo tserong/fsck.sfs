@@ -10,7 +10,7 @@ find_program(CMAKE_CXX_COMPILER
   PATHS /usr/bin
   REQUIRED)
 
-set(NAME fsck.s3gw)
+set(NAME fsck.sfs)
 project(${NAME} VERSION 0.0.1)
 
 set(BOOST_COMPONENTS program_options)

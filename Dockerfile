@@ -27,15 +27,15 @@ WORKDIR /src
 RUN cmake -B /build /src \
  && cmake --build /build
 
-FROM base as fsck.s3gw
+FROM base as fsck.sfs
 
 RUN zypper --non-interactive install \
   libboost_program_options1_80_0 \
   sqlite3 \
  && zypper clean --all
 
-COPY --from=build /build/fsck.s3gw /usr/bin/fsck.s3gw
+COPY --from=build /build/fsck.sfs /usr/bin/fsck.sfs
 
 VOLUME /volume
-ENTRYPOINT [ "/usr/bin/fsck.s3gw" ]
+ENTRYPOINT [ "/usr/bin/fsck.sfs" ]
 CMD [ "/volume" ]

@@ -24,8 +24,8 @@
  * and reviewed by a system administrator.
 */
 
-#ifndef FSCK_S3GW_SRC_CHECKS_ORPHANED_OBJECTS_H__
-#define FSCK_S3GW_SRC_CHECKS_ORPHANED_OBJECTS_H__
+#ifndef FSCK_SFS_SRC_CHECKS_ORPHANED_OBJECTS_H__
+#define FSCK_SFS_SRC_CHECKS_ORPHANED_OBJECTS_H__
 
 #include <filesystem>
 #include <memory>
@@ -70,4 +70,4 @@ class OrphanedObjectsCheck : public Check {
   virtual int check() override;
 };
 
-#endif  // FSCK_S3GW_SRC_CHECKS_ORPHANED_OBJECTS_H__
+#endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_OBJECTS_H__

@@ -15,7 +15,7 @@
  *
  * - - -
  *
- * fsck.s3gw
+ * fsck.sfs
  *
  * This program is used to check the filesystem backing the s3gw for consistency
  * and if needed repair any fixable problems found. It is meant to be run
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
   } else {
     FSCK_ASSERT(
         std::filesystem::exists(path_database),
-        "Metadata database not found (is this an s3gw volume?)"
+        "Metadata database not found (is this an sfs volume?)"
     );
     FSCK_ASSERT(
         std::filesystem::is_regular_file(path_database),

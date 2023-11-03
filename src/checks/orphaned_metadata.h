@@ -22,8 +22,8 @@
  * suggests it should be there, the fix will be to delete the metadata.
  */
 
-#ifndef FSCK_S3GW_SRC_CHECKS_ORPHANED_METADATA_H__
-#define FSCK_S3GW_SRC_CHECKS_ORPHANED_METADATA_H__
+#ifndef FSCK_SFS_SRC_CHECKS_ORPHANED_METADATA_H__
+#define FSCK_SFS_SRC_CHECKS_ORPHANED_METADATA_H__
 
 #include <filesystem>
 #include <memory>
@@ -55,4 +55,4 @@ class OrphanedMetadataCheck : public Check {
   virtual int check() override;
 };
 
-#endif  // FSCK_S3GW_SRC_CHECKS_ORPHANED_METADATA_H__
+#endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_METADATA_H__

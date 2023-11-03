@@ -66,7 +66,7 @@ int ObjectIntegrityCheck::check() {
     std::string checksum{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 2))};
     std::uintmax_t object_size = sqlite3_column_int64(stm, 3);
-    // first/second/fname logic lifted from s3gw's UUIDPath class
+    // first/second/fname logic lifted from sfs's UUIDPath class
     // *again* as we already did in OrphanedMetadataCheck
     // TODO: dedupe this
     std::filesystem::path first = uuid.substr(0, 2);
