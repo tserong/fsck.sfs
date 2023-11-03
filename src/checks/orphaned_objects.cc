@@ -77,7 +77,7 @@ std::string UnexpectedFileFix::to_string() const {
 }
 
 OrphanedObjectsCheck::OrphanedObjectsCheck(const std::filesystem::path& path)
-    : Check(path) {
+    : Check(NONFATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 

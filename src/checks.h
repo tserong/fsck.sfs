@@ -44,12 +44,15 @@ class Fix {
 class Check {
  protected:
   std::vector<std::shared_ptr<Fix>> fixes;
+  enum Fatality { FATAL, NONFATAL } fatality;
   const std::filesystem::path& root_path;
 
  public:
-  Check(const std::filesystem::path& path) : root_path(path) {}
+  Check(Fatality f, const std::filesystem::path& path)
+      : fatality(f), root_path(path) {}
   virtual ~Check(){};
   virtual bool check() = 0;
+  bool is_fatal() { return fatality == FATAL; }
   void fix();
   void show();
 };

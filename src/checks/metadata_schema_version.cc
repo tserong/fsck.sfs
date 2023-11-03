@@ -36,7 +36,7 @@ std::string MetadataSchemaVersionFix::to_string() const {
 MetadataSchemaVersionCheck::MetadataSchemaVersionCheck(
     const std::filesystem::path& path
 )
-    : Check(path) {
+    : Check(FATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 

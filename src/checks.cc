@@ -43,17 +43,24 @@ bool run_checks(const std::filesystem::path& path, bool should_fix) {
   bool all_checks_passed = true;
 
   std::vector<std::shared_ptr<Check>> checks;
-  // TODO: consider which of these checks should abort the entire process.
-  // I'm thinking in particular here of the metadata schema version check
-  // because if that fails, subsequent checks might not be valid.
   checks.emplace_back(std::make_shared<MetadataSchemaVersionCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedObjectsCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedMetadataCheck>(path));
   checks.emplace_back(std::make_shared<ObjectIntegrityCheck>(path));
 
   for (std::shared_ptr<Check> check : checks) {
-    all_checks_passed = check->check() ? all_checks_passed : false;
+    bool this_check_passed = check->check();
     check->show();
+    if (!this_check_passed) {
+      all_checks_passed = false;
+      if (check->is_fatal()) {
+        // Don't do any more checks if this check failure is fatal.
+        // TODO: integrate check->fix() here (try the fix, re-run the
+        // check, reset the failure state) otherwise you're basically
+        // screwed if there's a fatal failure.
+        break;
+      }
+    }
     if (should_fix) {
       check->fix();
     }

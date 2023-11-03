@@ -34,7 +34,7 @@ std::string ObjectIntegrityFix::to_string() const {
 }
 
 ObjectIntegrityCheck::ObjectIntegrityCheck(const std::filesystem::path& path)
-    : Check(path) {
+    : Check(NONFATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
