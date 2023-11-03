@@ -97,5 +97,5 @@ int main(int argc, char* argv[]) {
     FSCK_ASSERT(db.check_integrity(), "Database integrity check failed");
   }
 
-  return run_checks(path_root, options_map.count("fix") > 0);
+  return run_checks(path_root, options_map.count("fix") > 0) ? 0 : 1;
 }

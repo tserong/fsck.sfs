@@ -42,7 +42,7 @@ MetadataSchemaVersionCheck::MetadataSchemaVersionCheck(
 
 MetadataSchemaVersionCheck::~MetadataSchemaVersionCheck() {}
 
-int MetadataSchemaVersionCheck::check() {
+bool MetadataSchemaVersionCheck::check() {
   std::string query = "PRAGMA user_version;";
   int version = 0;
   int rc = 0;
@@ -63,5 +63,5 @@ int MetadataSchemaVersionCheck::check() {
         std::make_shared<MetadataSchemaVersionFix>(root_path, version)
     );
   }
-  return version == EXPECTED_METADATA_SCHEMA_VERSION ? 0 : 1;
+  return version == EXPECTED_METADATA_SCHEMA_VERSION;
 }

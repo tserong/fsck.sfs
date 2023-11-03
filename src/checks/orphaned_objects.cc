@@ -83,7 +83,7 @@ OrphanedObjectsCheck::OrphanedObjectsCheck(const std::filesystem::path& path)
 
 OrphanedObjectsCheck::~OrphanedObjectsCheck() {}
 
-int OrphanedObjectsCheck::check() {
+bool OrphanedObjectsCheck::check() {
   int orphan_count = 0;
   std::stack<std::filesystem::path> stack;
 
@@ -174,5 +174,5 @@ int OrphanedObjectsCheck::check() {
       }
     }
   }
-  return orphan_count != 0 ? 1 : 0;
+  return orphan_count == 0;
 }

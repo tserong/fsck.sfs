@@ -43,7 +43,7 @@ OrphanedMetadataCheck::OrphanedMetadataCheck(const std::filesystem::path& path)
 
 OrphanedMetadataCheck::~OrphanedMetadataCheck() {}
 
-int OrphanedMetadataCheck::check() {
+bool OrphanedMetadataCheck::check() {
   int orphan_count = 0;
   // TODO: Should we do a join here with the objects table in order
   // to get bucket id and object name for display purposes if something
@@ -81,5 +81,5 @@ int OrphanedMetadataCheck::check() {
   }
   sqlite3_finalize(stm);
 
-  return orphan_count != 0 ? 1 : 0;
+  return orphan_count == 0;
 }

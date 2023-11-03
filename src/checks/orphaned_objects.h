@@ -68,7 +68,7 @@ class OrphanedObjectsCheck : public Check {
  public:
   OrphanedObjectsCheck(const std::filesystem::path& path);
   virtual ~OrphanedObjectsCheck() override;
-  virtual int check() override;
+  virtual bool check() override;
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_OBJECTS_H__

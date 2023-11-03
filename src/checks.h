@@ -49,11 +49,11 @@ class Check {
  public:
   Check(const std::filesystem::path& path) : root_path(path) {}
   virtual ~Check(){};
-  virtual int check() = 0;
+  virtual bool check() = 0;
   void fix();
   void show();
 };
 
-int run_checks(const std::filesystem::path& path, bool should_fix);
+bool run_checks(const std::filesystem::path& path, bool should_fix);
 
 #endif  // FSCK_SFS_SRC_CHECKS_H__

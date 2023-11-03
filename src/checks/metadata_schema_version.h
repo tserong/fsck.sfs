@@ -47,7 +47,7 @@ class MetadataSchemaVersionCheck : public Check {
  public:
   MetadataSchemaVersionCheck(const std::filesystem::path& path);
   virtual ~MetadataSchemaVersionCheck() override;
-  virtual int check() override;
+  virtual bool check() override;
 };
 
 const int EXPECTED_METADATA_SCHEMA_VERSION = 4;

@@ -40,7 +40,7 @@ ObjectIntegrityCheck::ObjectIntegrityCheck(const std::filesystem::path& path)
 
 ObjectIntegrityCheck::~ObjectIntegrityCheck() {}
 
-int ObjectIntegrityCheck::check() {
+bool ObjectIntegrityCheck::check() {
   int fail_count = 0;
   // TODO: is there any sense in implementing this as a separate check
   // class as I have it here?  Why not just slide it in as part of the
@@ -54,7 +54,8 @@ int ObjectIntegrityCheck::check() {
 
   rc = metadata->prepare(query, &stm);
   if (rc != SQLITE_OK) {
-    return rc;
+    // TODO: this needs an error messages
+    return false;
   }
 
   rc = sqlite3_step(stm);
@@ -100,5 +101,5 @@ int ObjectIntegrityCheck::check() {
   }
   sqlite3_finalize(stm);
 
-  return fail_count != 0 ? 1 : 0;
+  return fail_count == 0;
 }

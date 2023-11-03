@@ -52,7 +52,7 @@ class OrphanedMetadataCheck : public Check {
  public:
   OrphanedMetadataCheck(const std::filesystem::path& path);
   virtual ~OrphanedMetadataCheck() override;
-  virtual int check() override;
+  virtual bool check() override;
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_METADATA_H__

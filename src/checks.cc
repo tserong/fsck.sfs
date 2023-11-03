@@ -39,8 +39,8 @@ void Check::show() {
   }
 }
 
-int run_checks(const std::filesystem::path& path, bool should_fix) {
-  int has_problem = 0;
+bool run_checks(const std::filesystem::path& path, bool should_fix) {
+  bool all_checks_passed = true;
 
   std::vector<std::shared_ptr<Check>> checks;
   // TODO: consider which of these checks should abort the entire process.
@@ -52,15 +52,15 @@ int run_checks(const std::filesystem::path& path, bool should_fix) {
   checks.emplace_back(std::make_shared<ObjectIntegrityCheck>(path));
 
   for (std::shared_ptr<Check> check : checks) {
-    has_problem = check->check() == 0 ? has_problem : 1;
+    all_checks_passed = check->check() ? all_checks_passed : false;
     check->show();
     if (should_fix) {
       check->fix();
     }
   }
 
-  if (!has_problem) {
+  if (all_checks_passed) {
     std::cout << "Everything's cool." << std::endl;
   }
-  return has_problem;
+  return all_checks_passed;
 }

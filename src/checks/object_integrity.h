@@ -48,7 +48,7 @@ class ObjectIntegrityCheck : public Check {
  public:
   ObjectIntegrityCheck(const std::filesystem::path& path);
   virtual ~ObjectIntegrityCheck() override;
-  virtual int check() override;
+  virtual bool check() override;
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_OBJECT_INTEGRITY_H__
