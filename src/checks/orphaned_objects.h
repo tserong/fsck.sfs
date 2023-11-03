@@ -35,37 +35,38 @@
 
 class OrphanedObjectsFix : public Fix {
  private:
-  std::filesystem::path root_path;
   std::filesystem::path obj_path;  // relative to root_path
 
   std::string to_string() const;
 
  public:
-  OrphanedObjectsFix(std::filesystem::path, std::filesystem::path);
+  OrphanedObjectsFix(
+      const std::filesystem::path& root, const std::filesystem::path& object
+  );
   operator std::string() const { return to_string(); };
   void fix();
 };
 
 class UnexpectedFileFix : public Fix {
  private:
-  std::filesystem::path root_path;
   std::filesystem::path obj_path;  // relative to root_path
 
   std::string to_string() const;
 
  public:
-  UnexpectedFileFix(std::filesystem::path, std::filesystem::path);
+  UnexpectedFileFix(
+      const std::filesystem::path& root, const std::filesystem::path& object
+  );
   operator std::string() const { return to_string(); };
   void fix();
 };
 
 class OrphanedObjectsCheck : public Check {
  private:
-  std::filesystem::path root_path;
   std::unique_ptr<Database> metadata;
 
  public:
-  OrphanedObjectsCheck(std::filesystem::path);
+  OrphanedObjectsCheck(const std::filesystem::path& path);
   virtual ~OrphanedObjectsCheck() override;
   virtual int check() override;
 };

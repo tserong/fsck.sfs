@@ -30,25 +30,23 @@
 
 class ObjectIntegrityFix : public Fix {
  private:
-  std::filesystem::path root_path;
   std::filesystem::path obj_path;  // relative to root_path
   std::string reason;
 
   std::string to_string() const;
 
  public:
-  ObjectIntegrityFix(const std::filesystem::path&, const std::filesystem::path&, const std::string&);
+  ObjectIntegrityFix(const std::filesystem::path& root, const std::filesystem::path& object, const std::string&);
   operator std::string() const { return to_string(); };
   void fix();
 };
 
 class ObjectIntegrityCheck : public Check {
  private:
-  std::filesystem::path root_path;
   std::unique_ptr<Database> metadata;
 
  public:
-  ObjectIntegrityCheck(std::filesystem::path);
+  ObjectIntegrityCheck(const std::filesystem::path& path);
   virtual ~ObjectIntegrityCheck() override;
   virtual int check() override;
 };

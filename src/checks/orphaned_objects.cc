@@ -24,11 +24,9 @@
 #include <stack>
 
 OrphanedObjectsFix::OrphanedObjectsFix(
-    std::filesystem::path root, std::filesystem::path path
-) {
-  root_path = root;
-  obj_path = path;
-}
+    const std::filesystem::path& root, const std::filesystem::path& object
+)
+    : Fix(root), obj_path(object) {}
 
 void OrphanedObjectsFix::fix() {
   // TODO: print a message of what was actually done when the fix was applied!
@@ -66,11 +64,9 @@ std::string OrphanedObjectsFix::to_string() const {
 }
 
 UnexpectedFileFix::UnexpectedFileFix(
-    std::filesystem::path root, std::filesystem::path path
-) {
-  root_path = root;
-  obj_path = path;
-}
+    const std::filesystem::path& root, const std::filesystem::path& object
+)
+    : Fix(root), obj_path(object) {}
 
 void UnexpectedFileFix::fix() {
   // TODO: do we really want to move unexpected files to lost+found?
@@ -80,8 +76,8 @@ std::string UnexpectedFileFix::to_string() const {
   return "Found unexpected mystery file: " + obj_path.string();
 }
 
-OrphanedObjectsCheck::OrphanedObjectsCheck(std::filesystem::path path) {
-  root_path = path;
+OrphanedObjectsCheck::OrphanedObjectsCheck(const std::filesystem::path& path)
+    : Check(path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 

@@ -26,11 +26,9 @@
 #include <stack>
 
 OrphanedMetadataFix::OrphanedMetadataFix(
-    std::filesystem::path root, std::filesystem::path path
-) {
-  root_path = root;
-  obj_path = path;
-}
+    const std::filesystem::path& root, const std::filesystem::path& object
+)
+    : Fix(root), obj_path(object) {}
 
 void OrphanedMetadataFix::fix() {}
 
@@ -38,8 +36,8 @@ std::string OrphanedMetadataFix::to_string() const {
   return "orphaned metadata: " + obj_path.string();
 }
 
-OrphanedMetadataCheck::OrphanedMetadataCheck(std::filesystem::path path) {
-  root_path = path;
+OrphanedMetadataCheck::OrphanedMetadataCheck(const std::filesystem::path& path)
+    : Check(path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 

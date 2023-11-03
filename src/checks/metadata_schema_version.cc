@@ -22,11 +22,9 @@
 #include <string>
 
 MetadataSchemaVersionFix::MetadataSchemaVersionFix(
-    std::filesystem::path root, int version
-) {
-  root_path = root;
-  schema_version = version;
-}
+    const std::filesystem::path& path, int version
+)
+    : Fix(path), schema_version(version) {}
 
 void MetadataSchemaVersionFix::fix() {}
 
@@ -36,9 +34,9 @@ std::string MetadataSchemaVersionFix::to_string() const {
 }
 
 MetadataSchemaVersionCheck::MetadataSchemaVersionCheck(
-    std::filesystem::path path
-) {
-  root_path = path;
+    const std::filesystem::path& path
+)
+    : Check(path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 

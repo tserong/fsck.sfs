@@ -33,24 +33,24 @@
 
 class OrphanedMetadataFix : public Fix {
  private:
-  std::filesystem::path root_path;
   std::filesystem::path obj_path;  // relative to root_path
 
   std::string to_string() const;
 
  public:
-  OrphanedMetadataFix(std::filesystem::path, std::filesystem::path);
+  OrphanedMetadataFix(
+      const std::filesystem::path& root, const std::filesystem::path& object
+  );
   operator std::string() const { return to_string(); };
   void fix();
 };
 
 class OrphanedMetadataCheck : public Check {
  private:
-  std::filesystem::path root_path;
   std::unique_ptr<Database> metadata;
 
  public:
-  OrphanedMetadataCheck(std::filesystem::path);
+  OrphanedMetadataCheck(const std::filesystem::path& path);
   virtual ~OrphanedMetadataCheck() override;
   virtual int check() override;
 };

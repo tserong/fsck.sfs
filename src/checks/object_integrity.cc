@@ -21,10 +21,10 @@
 #include <filesystem>
 
 ObjectIntegrityFix::ObjectIntegrityFix(
-    const std::filesystem::path& _root, const std::filesystem::path& _path,
+    const std::filesystem::path& root, const std::filesystem::path& object,
     const std::string& _reason
 )
-    : root_path(_root), obj_path(_path), reason(_reason) {}
+    : Fix(root), obj_path(object), reason(_reason) {}
 
 void ObjectIntegrityFix::fix() {}
 
@@ -33,8 +33,8 @@ std::string ObjectIntegrityFix::to_string() const {
          reason;
 }
 
-ObjectIntegrityCheck::ObjectIntegrityCheck(std::filesystem::path path) {
-  root_path = path;
+ObjectIntegrityCheck::ObjectIntegrityCheck(const std::filesystem::path& path)
+    : Check(path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 

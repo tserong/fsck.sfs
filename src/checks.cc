@@ -39,7 +39,7 @@ void Check::show() {
   }
 }
 
-int run_checks(std::filesystem::path path, bool should_fix) {
+int run_checks(const std::filesystem::path& path, bool should_fix) {
   int has_problem = 0;
 
   std::vector<std::shared_ptr<Check>> checks;

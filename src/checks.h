@@ -26,7 +26,11 @@
  * an incosistency in the filesystem or metadata database.
  */
 class Fix {
+ protected:
+  const std::filesystem::path& root_path;
+
  public:
+  Fix(const std::filesystem::path& path) : root_path(path) {}
   virtual ~Fix(){};
   virtual operator std::string() const = 0;
   virtual void fix() = 0;
@@ -40,14 +44,16 @@ class Fix {
 class Check {
  protected:
   std::vector<std::shared_ptr<Fix>> fixes;
+  const std::filesystem::path& root_path;
 
  public:
+  Check(const std::filesystem::path& path) : root_path(path) {}
   virtual ~Check(){};
   virtual int check() = 0;
   void fix();
   void show();
 };
 
-int run_checks(std::filesystem::path, bool);
+int run_checks(const std::filesystem::path& path, bool should_fix);
 
 #endif  // FSCK_SFS_SRC_CHECKS_H__

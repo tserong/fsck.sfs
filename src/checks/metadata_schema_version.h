@@ -30,24 +30,22 @@
 
 class MetadataSchemaVersionFix : public Fix {
  private:
-  std::filesystem::path root_path;
   int schema_version;
 
   std::string to_string() const;
 
  public:
-  MetadataSchemaVersionFix(std::filesystem::path, int);
+  MetadataSchemaVersionFix(const std::filesystem::path& path, int version);
   operator std::string() const { return to_string(); };
   void fix();
 };
 
 class MetadataSchemaVersionCheck : public Check {
  private:
-  std::filesystem::path root_path;
   std::unique_ptr<Database> metadata;
 
  public:
-  MetadataSchemaVersionCheck(std::filesystem::path);
+  MetadataSchemaVersionCheck(const std::filesystem::path& path);
   virtual ~MetadataSchemaVersionCheck() override;
   virtual int check() override;
 };
