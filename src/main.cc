@@ -93,8 +93,6 @@ int main(int argc, char* argv[]) {
         std::filesystem::is_regular_file(path_database),
         "Metadata database is not a regular file"
     );
-    Database db(path_database);
-    FSCK_ASSERT(db.check_integrity(), "Database integrity check failed");
   }
 
   return run_checks(path_root, options_map.count("fix") > 0) ? 0 : 1;

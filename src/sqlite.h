@@ -36,8 +36,6 @@ class Database {
   Database(std::filesystem::path);
   ~Database();
 
-  bool check_integrity();
-
   int prepare(std::string, sqlite3_stmt**);
 
   int count_in_table(std::string, std::string);

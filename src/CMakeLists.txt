@@ -31,6 +31,7 @@ set(sources
   main.cc
   checks.cc
   sqlite.cc
+  checks/metadata_integrity.cc
   checks/metadata_schema_version.cc
   checks/orphaned_metadata.cc
   checks/orphaned_objects.cc

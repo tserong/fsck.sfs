@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 
+#include "checks/metadata_integrity.h"
 #include "checks/metadata_schema_version.h"
 #include "checks/object_integrity.h"
 #include "checks/orphaned_metadata.h"
@@ -43,6 +44,7 @@ bool run_checks(const std::filesystem::path& path, bool should_fix) {
   bool all_checks_passed = true;
 
   std::vector<std::shared_ptr<Check>> checks;
+  checks.emplace_back(std::make_shared<MetadataIntegrityCheck>(path));
   checks.emplace_back(std::make_shared<MetadataSchemaVersionCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedObjectsCheck>(path));
   checks.emplace_back(std::make_shared<OrphanedMetadataCheck>(path));
