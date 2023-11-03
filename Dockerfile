@@ -4,6 +4,11 @@ RUN zypper --non-interactive ar \
   https://download.opensuse.org/repositories/filesystems:/ceph:/s3gw/15.4/ s3gw \
  && zypper --gpg-auto-import-keys ref
 
+# Needed to match sqlite3 version in s3gw's Dockerfile
+RUN zypper --non-interactive install \
+  libsqlite3-0=3.43.1 \
+ && zypper clean --all
+
 FROM base as build
 
 RUN zypper --non-interactive install \
