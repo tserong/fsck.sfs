@@ -44,10 +44,12 @@ class MetadataSchemaVersionCheck : public Check {
  private:
   std::unique_ptr<Database> metadata;
 
+ protected:
+  virtual bool do_check() override;
+
  public:
   MetadataSchemaVersionCheck(const std::filesystem::path& path);
   virtual ~MetadataSchemaVersionCheck() override;
-  virtual bool check() override;
 };
 
 const int EXPECTED_METADATA_SCHEMA_VERSION = 4;

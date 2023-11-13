@@ -36,13 +36,13 @@ std::string MetadataSchemaVersionFix::to_string() const {
 MetadataSchemaVersionCheck::MetadataSchemaVersionCheck(
     const std::filesystem::path& path
 )
-    : Check(FATAL, path) {
+    : Check("metadata schema version", FATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
 MetadataSchemaVersionCheck::~MetadataSchemaVersionCheck() {}
 
-bool MetadataSchemaVersionCheck::check() {
+bool MetadataSchemaVersionCheck::do_check() {
   std::string query = "PRAGMA user_version;";
   int version = 0;
   int rc = 0;
@@ -55,9 +55,12 @@ bool MetadataSchemaVersionCheck::check() {
   if (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
     version = sqlite3_column_int(stm, 0);
   } else {
+    // FIXME: this should probably raise an exception (at the
+    // very least we shouldn't be printing anything directly here)
     std::cout << "Error" << sqlite3_errmsg(metadata->handle) << std::endl;
   }
   sqlite3_finalize(stm);
+  log_verbose("Got schema version " + std::to_string(version));
   if (version != EXPECTED_METADATA_SCHEMA_VERSION) {
     fixes.emplace_back(
         std::make_shared<MetadataSchemaVersionFix>(root_path, version)

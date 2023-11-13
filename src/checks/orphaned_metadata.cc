@@ -37,13 +37,13 @@ std::string OrphanedMetadataFix::to_string() const {
 }
 
 OrphanedMetadataCheck::OrphanedMetadataCheck(const std::filesystem::path& path)
-    : Check(NONFATAL, path) {
+    : Check("orphaned metadata", NONFATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
 OrphanedMetadataCheck::~OrphanedMetadataCheck() {}
 
-bool OrphanedMetadataCheck::check() {
+bool OrphanedMetadataCheck::do_check() {
   int orphan_count = 0;
   // TODO: Should we do a join here with the objects table in order
   // to get bucket id and object name for display purposes if something
@@ -64,6 +64,7 @@ bool OrphanedMetadataCheck::check() {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};
     std::string id{reinterpret_cast<const char*>(sqlite3_column_text(stm, 1))};
+    log_verbose("Checking object " + id + " (uuid: " + uuid + ")");
     id.append(".v");
     // first/second/fname logic lifted from sfs's UUIDPath class
     std::filesystem::path first = uuid.substr(0, 2);

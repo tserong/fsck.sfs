@@ -77,13 +77,13 @@ std::string UnexpectedFileFix::to_string() const {
 }
 
 OrphanedObjectsCheck::OrphanedObjectsCheck(const std::filesystem::path& path)
-    : Check(NONFATAL, path) {
+    : Check("orphaned objects", NONFATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
 OrphanedObjectsCheck::~OrphanedObjectsCheck() {}
 
-bool OrphanedObjectsCheck::check() {
+bool OrphanedObjectsCheck::do_check() {
   int orphan_count = 0;
   std::stack<std::filesystem::path> stack;
 
@@ -108,6 +108,8 @@ bool OrphanedObjectsCheck::check() {
       } else {
         std::filesystem::path rel =
             std::filesystem::relative(cwd / entry.path(), root_path);
+
+        log_verbose("Checking file " + rel.string());
 
         std::filesystem::path uuid_path =
             std::filesystem::relative(cwd, root_path);
@@ -158,11 +160,13 @@ bool OrphanedObjectsCheck::check() {
             } else {
               std::cout << "This can't happen" << std::endl;
               // TODO: You sure about that bro?
+              // FIXME: Throw an exception here rather than printing to stdout
             }
             sqlite3_finalize(stm);
           } else {
             std::cout << "This shouldn't happen" << std::endl;
             // TODO: What?  Seriously?  Do better with the error handling.
+            // FIXME: Throw an exception here rather than printing to stdout
           }
         } else {
           // This is something else

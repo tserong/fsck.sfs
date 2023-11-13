@@ -19,6 +19,7 @@
 #include <sqlite3.h>
 
 #include <filesystem>
+#include <iostream>
 
 ObjectIntegrityFix::ObjectIntegrityFix(
     const std::filesystem::path& root, const std::filesystem::path& object,
@@ -34,13 +35,13 @@ std::string ObjectIntegrityFix::to_string() const {
 }
 
 ObjectIntegrityCheck::ObjectIntegrityCheck(const std::filesystem::path& path)
-    : Check(NONFATAL, path) {
+    : Check("object integrity", NONFATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
 ObjectIntegrityCheck::~ObjectIntegrityCheck() {}
 
-bool ObjectIntegrityCheck::check() {
+bool ObjectIntegrityCheck::do_check() {
   int fail_count = 0;
   // TODO: is there any sense in implementing this as a separate check
   // class as I have it here?  Why not just slide it in as part of the
@@ -63,6 +64,7 @@ bool ObjectIntegrityCheck::check() {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};
     std::string id{reinterpret_cast<const char*>(sqlite3_column_text(stm, 1))};
+    log_verbose("Checking object " + id + " (uuid: " + uuid + ")");
     id.append(".v");
     std::string checksum{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 2))};

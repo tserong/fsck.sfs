@@ -47,6 +47,8 @@ int main(int argc, char* argv[]) {
       "don't return an error if the volume is uninitialized")(
         "path,p", boost::program_options::value<std::string>(), "path to check"
     )("quiet,q", "run silently")("verbose,v", "more verbose output");
+    // TODO: it's currently possible to specify both quiet and
+    // verbose at the same time.  This is a bit ridiculous.
 
     boost::program_options::positional_options_description p;
     p.add("path", -1);
@@ -95,5 +97,14 @@ int main(int argc, char* argv[]) {
     );
   }
 
-  return run_checks(path_root, options_map.count("fix") > 0) ? 0 : 1;
+  Check::LogLevel log_level = Check::LogLevel::NORMAL;
+  if (options_map.count("quiet") > 0) {
+    // TODO: fix discrepancy between terms "quiet" and "silent"?
+    log_level = Check::LogLevel::SILENT;
+  }
+  if (options_map.count("verbose") > 0) {
+    log_level = Check::LogLevel::VERBOSE;
+  }
+
+  return run_checks(path_root, log_level, options_map.count("fix") > 0) ? 0 : 1;
 }

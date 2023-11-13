@@ -32,20 +32,23 @@ void MetadataIntegrityFix::fix() {}
 std::string MetadataIntegrityFix::to_string() const {
   std::string msg("Database integrity check failed:");
   for (auto& s : errors) {
-    msg += "\n- " + s;
+    // note: this indent needs to match the indent in Check::show()
+    // TODO: figure out if we can drop the indent here and make Check::show()
+    // handle it automatically when it sees newlines.
+    msg += "\n  - " + s;
   }
   return msg;
 }
 
 MetadataIntegrityCheck::MetadataIntegrityCheck(const std::filesystem::path& path
 )
-    : Check(FATAL, path) {
+    : Check("metadata integrity", FATAL, path) {
   metadata = std::make_unique<Database>(root_path / "s3gw.db");
 }
 
 MetadataIntegrityCheck::~MetadataIntegrityCheck() {}
 
-bool MetadataIntegrityCheck::check() {
+bool MetadataIntegrityCheck::do_check() {
   std::vector<std::string> errors;
   auto callback = [](void* arg, int num_columns, char** column_data, char**) {
     assert(num_columns == 1);

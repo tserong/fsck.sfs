@@ -49,10 +49,12 @@ class OrphanedMetadataCheck : public Check {
  private:
   std::unique_ptr<Database> metadata;
 
+ protected:
+  virtual bool do_check() override;
+
  public:
   OrphanedMetadataCheck(const std::filesystem::path& path);
   virtual ~OrphanedMetadataCheck() override;
-  virtual bool check() override;
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_METADATA_H__

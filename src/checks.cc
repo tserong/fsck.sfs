@@ -36,11 +36,30 @@ void Check::fix() {
 
 void Check::show() {
   for (std::shared_ptr<Fix> fix : fixes) {
-    std::cout << std::string(*fix) << std::endl;
+    // TODO: figure out how to handle embedded newlines (see comment in
+    // MetadataIntegrityFix::to_string())
+    std::cout << "  " << std::string(*fix) << std::endl;
   }
 }
 
-bool run_checks(const std::filesystem::path& path, bool should_fix) {
+bool Check::check(Check::LogLevel log_level) {
+  check_log_level = log_level;
+  if (log_level > SILENT) {
+    std::cout << "Checking " << check_name << "..." << std::endl;
+  }
+  return do_check();
+}
+
+void Check::log_verbose(const std::string& msg) const {
+  if (check_log_level == VERBOSE) {
+    std::cout << "  " << msg << std::endl;
+  }
+}
+
+bool run_checks(
+    const std::filesystem::path& path, Check::LogLevel log_level,
+    bool should_fix
+) {
   bool all_checks_passed = true;
 
   std::vector<std::shared_ptr<Check>> checks;
@@ -51,8 +70,10 @@ bool run_checks(const std::filesystem::path& path, bool should_fix) {
   checks.emplace_back(std::make_shared<ObjectIntegrityCheck>(path));
 
   for (std::shared_ptr<Check> check : checks) {
-    bool this_check_passed = check->check();
-    check->show();
+    bool this_check_passed = check->check(log_level);
+    if (log_level > Check::LogLevel::SILENT) {
+      check->show();
+    }
     if (!this_check_passed) {
       all_checks_passed = false;
       if (check->is_fatal()) {
@@ -68,8 +89,8 @@ bool run_checks(const std::filesystem::path& path, bool should_fix) {
     }
   }
 
-  if (all_checks_passed) {
-    std::cout << "Everything's cool." << std::endl;
+  if (all_checks_passed && log_level > Check::LogLevel::SILENT) {
+    std::cout << "All checks passed." << std::endl;
   }
   return all_checks_passed;
 }

@@ -44,19 +44,30 @@ class Fix {
 class Check {
  protected:
   std::vector<std::shared_ptr<Fix>> fixes;
+  const std::string check_name;
   enum Fatality { FATAL, NONFATAL } fatality;
   const std::filesystem::path& root_path;
+  virtual bool do_check() = 0;
+  void log_verbose(const std::string& msg) const;
 
  public:
-  Check(Fatality f, const std::filesystem::path& path)
-      : fatality(f), root_path(path) {}
+  Check(const std::string& name, Fatality f, const std::filesystem::path& path)
+      : check_name(name), fatality(f), root_path(path) {}
   virtual ~Check(){};
-  virtual bool check() = 0;
+  enum LogLevel { SILENT, NORMAL, VERBOSE };
+  bool check(LogLevel log_level = NORMAL);
   bool is_fatal() { return fatality == FATAL; }
   void fix();
   void show();
+
+ private:
+  // Transient, only valid inside check() so that log_verbose() works
+  LogLevel check_log_level;
 };
 
-bool run_checks(const std::filesystem::path& path, bool should_fix);
+bool run_checks(
+    const std::filesystem::path& path, Check::LogLevel log_level,
+    bool should_fix
+);
 
 #endif  // FSCK_SFS_SRC_CHECKS_H__
