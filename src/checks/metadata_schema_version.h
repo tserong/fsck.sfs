@@ -19,7 +19,6 @@
 #include <memory>
 
 #include "checks.h"
-#include "sqlite.h"
 
 class MetadataSchemaVersionFix : public Fix {
  private:
@@ -34,15 +33,13 @@ class MetadataSchemaVersionFix : public Fix {
 };
 
 class MetadataSchemaVersionCheck : public Check {
- private:
-  std::unique_ptr<Database> metadata;
-
  protected:
   virtual bool do_check() override;
 
  public:
-  MetadataSchemaVersionCheck(const std::filesystem::path& path);
-  virtual ~MetadataSchemaVersionCheck() override;
+  MetadataSchemaVersionCheck(const std::filesystem::path& path)
+      : Check("metadata schema version", FATAL, path) {}
+  virtual ~MetadataSchemaVersionCheck() override {}
 };
 
 const int EXPECTED_METADATA_SCHEMA_VERSION = 4;

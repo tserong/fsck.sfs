@@ -24,7 +24,6 @@
 #include <memory>
 
 #include "checks.h"
-#include "sqlite.h"
 
 class OrphanedObjectsFix : public Fix {
  private:
@@ -55,15 +54,13 @@ class UnexpectedFileFix : public Fix {
 };
 
 class OrphanedObjectsCheck : public Check {
- private:
-  std::unique_ptr<Database> metadata;
-
  protected:
   virtual bool do_check() override;
 
  public:
-  OrphanedObjectsCheck(const std::filesystem::path& path);
-  virtual ~OrphanedObjectsCheck() override;
+  OrphanedObjectsCheck(const std::filesystem::path& path)
+      : Check("orphaned objects", NONFATAL, path) {}
+  virtual ~OrphanedObjectsCheck() override {}
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_OBJECTS_H__

@@ -29,13 +29,6 @@ std::string OrphanedMetadataFix::to_string() const {
   return "orphaned metadata: " + obj_path.string();
 }
 
-OrphanedMetadataCheck::OrphanedMetadataCheck(const std::filesystem::path& path)
-    : Check("orphaned metadata", NONFATAL, path) {
-  metadata = std::make_unique<Database>(root_path / "s3gw.db");
-}
-
-OrphanedMetadataCheck::~OrphanedMetadataCheck() {}
-
 bool OrphanedMetadataCheck::do_check() {
   int orphan_count = 0;
   // TODO: Should we do a join here with the objects table in order

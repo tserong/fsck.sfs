@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include "sqlite.h"
+
 /* Fix - This is an abstract datatype representing an executable action to fix
  * an incosistency in the filesystem or metadata database.
  */
@@ -40,12 +42,16 @@ class Check {
   const std::string check_name;
   enum Fatality { FATAL, NONFATAL } fatality;
   const std::filesystem::path& root_path;
+  std::unique_ptr<Database> metadata;
   virtual bool do_check() = 0;
   void log_verbose(const std::string& msg) const;
 
  public:
   Check(const std::string& name, Fatality f, const std::filesystem::path& path)
-      : check_name(name), fatality(f), root_path(path) {}
+      : check_name(name),
+        fatality(f),
+        root_path(path),
+        metadata(std::make_unique<Database>(path / "s3gw.db")) {}
   virtual ~Check(){};
   enum LogLevel { SILENT, NORMAL, VERBOSE };
   bool check(LogLevel log_level = NORMAL);

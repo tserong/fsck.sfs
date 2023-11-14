@@ -26,15 +26,6 @@ std::string MetadataSchemaVersionFix::to_string() const {
          "; expected: " + std::to_string(EXPECTED_METADATA_SCHEMA_VERSION);
 }
 
-MetadataSchemaVersionCheck::MetadataSchemaVersionCheck(
-    const std::filesystem::path& path
-)
-    : Check("metadata schema version", FATAL, path) {
-  metadata = std::make_unique<Database>(root_path / "s3gw.db");
-}
-
-MetadataSchemaVersionCheck::~MetadataSchemaVersionCheck() {}
-
 bool MetadataSchemaVersionCheck::do_check() {
   std::string query = "PRAGMA user_version;";
   int version = 0;

@@ -69,13 +69,6 @@ std::string UnexpectedFileFix::to_string() const {
   return "Found unexpected mystery file: " + obj_path.string();
 }
 
-OrphanedObjectsCheck::OrphanedObjectsCheck(const std::filesystem::path& path)
-    : Check("orphaned objects", NONFATAL, path) {
-  metadata = std::make_unique<Database>(root_path / "s3gw.db");
-}
-
-OrphanedObjectsCheck::~OrphanedObjectsCheck() {}
-
 bool OrphanedObjectsCheck::do_check() {
   int orphan_count = 0;
   std::stack<std::filesystem::path> stack;

@@ -27,13 +27,6 @@ std::string ObjectIntegrityFix::to_string() const {
          reason;
 }
 
-ObjectIntegrityCheck::ObjectIntegrityCheck(const std::filesystem::path& path)
-    : Check("object integrity", NONFATAL, path) {
-  metadata = std::make_unique<Database>(root_path / "s3gw.db");
-}
-
-ObjectIntegrityCheck::~ObjectIntegrityCheck() {}
-
 bool ObjectIntegrityCheck::do_check() {
   int fail_count = 0;
   // TODO: is there any sense in implementing this as a separate check

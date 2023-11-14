@@ -19,7 +19,6 @@
 #define FSCK_SFS_SRC_CHECKS_OBJECT_INTEGRITY_H__
 
 #include "checks.h"
-#include "sqlite.h"
 
 class ObjectIntegrityFix : public Fix {
  private:
@@ -35,15 +34,13 @@ class ObjectIntegrityFix : public Fix {
 };
 
 class ObjectIntegrityCheck : public Check {
- private:
-  std::unique_ptr<Database> metadata;
-
  protected:
   virtual bool do_check() override;
 
  public:
-  ObjectIntegrityCheck(const std::filesystem::path& path);
-  virtual ~ObjectIntegrityCheck() override;
+  ObjectIntegrityCheck(const std::filesystem::path& path)
+      : Check("object integrity", NONFATAL, path) {}
+  virtual ~ObjectIntegrityCheck() override{};
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_OBJECT_INTEGRITY_H__

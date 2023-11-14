@@ -14,7 +14,6 @@
 #include <memory>
 
 #include "checks.h"
-#include "sqlite.h"
 
 class MetadataIntegrityFix : public Fix {
  private:
@@ -30,15 +29,13 @@ class MetadataIntegrityFix : public Fix {
 };
 
 class MetadataIntegrityCheck : public Check {
- private:
-  std::unique_ptr<Database> metadata;
-
  protected:
   virtual bool do_check() override;
 
  public:
-  MetadataIntegrityCheck(const std::filesystem::path& path);
-  virtual ~MetadataIntegrityCheck() override;
+  MetadataIntegrityCheck(const std::filesystem::path& path)
+      : Check("metadata integrity", FATAL, path) {}
+  virtual ~MetadataIntegrityCheck() override{};
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_METADATA_INTEGRITY_H__

@@ -33,14 +33,6 @@ std::string MetadataIntegrityFix::to_string() const {
   return msg;
 }
 
-MetadataIntegrityCheck::MetadataIntegrityCheck(const std::filesystem::path& path
-)
-    : Check("metadata integrity", FATAL, path) {
-  metadata = std::make_unique<Database>(root_path / "s3gw.db");
-}
-
-MetadataIntegrityCheck::~MetadataIntegrityCheck() {}
-
 bool MetadataIntegrityCheck::do_check() {
   std::vector<std::string> errors;
   auto callback = [](void* arg, int num_columns, char** column_data, char**) {

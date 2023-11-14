@@ -22,7 +22,6 @@
 #include <memory>
 
 #include "checks.h"
-#include "sqlite.h"
 
 class OrphanedMetadataFix : public Fix {
  private:
@@ -39,15 +38,13 @@ class OrphanedMetadataFix : public Fix {
 };
 
 class OrphanedMetadataCheck : public Check {
- private:
-  std::unique_ptr<Database> metadata;
-
  protected:
   virtual bool do_check() override;
 
  public:
-  OrphanedMetadataCheck(const std::filesystem::path& path);
-  virtual ~OrphanedMetadataCheck() override;
+  OrphanedMetadataCheck(const std::filesystem::path& path)
+      : Check("orphaned metadata", NONFATAL, path) {}
+  virtual ~OrphanedMetadataCheck() override {}
 };
 
 #endif  // FSCK_SFS_SRC_CHECKS_ORPHANED_METADATA_H__
