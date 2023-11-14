@@ -22,17 +22,20 @@
 
 class Database {
  private:
-  std::filesystem::path db;
+  const std::filesystem::path& db;
 
  public:
   sqlite3* handle;
-  Database(std::filesystem::path);
+  Database(const std::filesystem::path& _db);
   ~Database();
 
-  int prepare(std::string, sqlite3_stmt**);
+  int prepare(const std::string& query, sqlite3_stmt** stm) const;
 
-  int count_in_table(std::string, std::string);
-  std::vector<std::string> select_from_table(std::string, std::string);
+  int count_in_table(const std::string& table, const std::string& condition)
+      const;
+  std::vector<std::string> select_from_table(
+      const std::string& table, const std::string& column
+  ) const;
 };
 
 #endif  // FSCK_SFS_SRC_SQLITE_H__
