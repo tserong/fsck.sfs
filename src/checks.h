@@ -17,6 +17,8 @@
 
 #include "sqlite.h"
 
+constexpr std::string_view DB_FILENAME = "s3gw.db";
+
 /* Fix - This is an abstract datatype representing an executable action to fix
  * an incosistency in the filesystem or metadata database.
  */
@@ -51,7 +53,7 @@ class Check {
       : check_name(name),
         fatality(f),
         root_path(path),
-        metadata(std::make_unique<Database>(path / "s3gw.db")) {}
+        metadata(std::make_unique<Database>(path / DB_FILENAME)) {}
   virtual ~Check(){};
   enum LogLevel { SILENT, NORMAL, VERBOSE };
   bool check(LogLevel log_level = NORMAL);

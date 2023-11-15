@@ -66,9 +66,7 @@ int main(int argc, char* argv[]) {
 
   std::string path_str(options_map["path"].as<std::string>());
   std::filesystem::path path_root(path_str);
-  std::filesystem::path path_database = path_root / "s3gw.db";
-  std::filesystem::path path_database_shm = path_root / "s3gw.db_tmp-shm";
-  std::filesystem::path path_database_wal = path_root / "s3gw.db-wal";
+  std::filesystem::path path_database = path_root / DB_FILENAME;
 
   FSCK_ASSERT(std::filesystem::exists(path_root), "Path not found");
   FSCK_ASSERT(
