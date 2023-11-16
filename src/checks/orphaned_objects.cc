@@ -126,7 +126,7 @@ bool OrphanedObjectsCheck::do_check() {
               " AND "
               "      path_uuid = '" +
               uuid + "'";
-          sqlite3_stmt* stm = metadata->prepare(query);
+          Statement stm(metadata->handle, query);
           if (sqlite3_step(stm) == SQLITE_ROW &&
               sqlite3_column_count(stm) > 0) {
             int count = sqlite3_column_int(stm, 0);
@@ -143,11 +143,8 @@ bool OrphanedObjectsCheck::do_check() {
           } else {
             // This can't happen ("SELECT COUNT(...)" is _always_ going
             // to give us one row with one column...)
-            const char* err = sqlite3_errmsg(metadata->handle);
-            sqlite3_finalize(stm);
-            throw std::runtime_error(err);
+            throw std::runtime_error(sqlite3_errmsg(metadata->handle));
           }
-          sqlite3_finalize(stm);
         } else {
           // This is something else
           fixes.emplace_back(

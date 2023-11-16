@@ -37,7 +37,7 @@ bool ObjectIntegrityCheck::do_check() {
       "SELECT object_id, id, checksum, size FROM versioned_objects "
       "WHERE object_id IS NOT NULL;";
 
-  sqlite3_stmt* stm = metadata->prepare(query);
+  Statement stm(metadata->handle, query);
   int rc = sqlite3_step(stm);
   while (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
     std::string uuid{
@@ -80,7 +80,6 @@ bool ObjectIntegrityCheck::do_check() {
 
     rc = sqlite3_step(stm);
   }
-  sqlite3_finalize(stm);
 
   return fail_count == 0;
 }

@@ -20,6 +20,24 @@
 #include <string>
 #include <vector>
 
+class Statement {
+ private:
+  sqlite3_stmt* stmt;
+
+ public:
+  Statement() = delete;
+  Statement(const Statement&) = delete;
+  Statement& operator=(const Statement&) = delete;
+  Statement(sqlite3* db, const std::string& query) : stmt(nullptr) {
+    if (sqlite3_prepare_v2(db, query.c_str(), query.length(), &stmt, nullptr) !=
+        SQLITE_OK) {
+      throw std::runtime_error(sqlite3_errmsg(db));
+    }
+  };
+  virtual ~Statement() { sqlite3_finalize(stmt); };
+  operator sqlite3_stmt*() { return stmt; }
+};
+
 class Database {
  private:
   const std::filesystem::path& db;
@@ -29,13 +47,11 @@ class Database {
   Database(const std::filesystem::path& _db);
   ~Database();
 
-  sqlite3_stmt* prepare(const std::string& query) const;
-
   int count_in_table(const std::string& table, const std::string& condition)
       const;
-  std::vector<std::string> select_from_table(
-      const std::string& table, const std::string& column
-  ) const;
+  //std::vector<std::string> select_from_table(
+  //    const std::string& table, const std::string& column
+  //) const;
 };
 
 #endif  // FSCK_SFS_SRC_SQLITE_H__

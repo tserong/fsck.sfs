@@ -37,7 +37,7 @@ bool OrphanedMetadataCheck::do_check() {
   std::string query =
       "SELECT object_id, id FROM versioned_objects WHERE object_id IS NOT "
       "NULL;";
-  sqlite3_stmt* stm = metadata->prepare(query);
+  Statement stm(metadata->handle, query);
 
   int rc = sqlite3_step(stm);
   while (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
@@ -60,7 +60,6 @@ bool OrphanedMetadataCheck::do_check() {
     }
     rc = sqlite3_step(stm);
   }
-  sqlite3_finalize(stm);
 
   return orphan_count == 0;
 }
