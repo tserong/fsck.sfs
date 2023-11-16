@@ -126,34 +126,28 @@ bool OrphanedObjectsCheck::do_check() {
               " AND "
               "      path_uuid = '" +
               uuid + "'";
-          sqlite3_stmt* stm;
-          if (metadata->prepare(query, &stm) == SQLITE_OK) {
-            if (sqlite3_step(stm) == SQLITE_ROW &&
-                sqlite3_column_count(stm) > 0) {
-              int count = sqlite3_column_int(stm, 0);
-              if (count == 0) {
-                fixes.emplace_back(
-                    // TODO: Consider making an OrphanedMultipartFix class.
-                    // OrphanedOjectsFix works fine, but the messaging might
-                    // be slightly misleading ("orphaned object: uuid-n ..."
-                    // vs. what would be "orhpaned multipart part: ...")
-                    std::make_shared<OrphanedObjectsFix>(
-                        root_path, rel.string()
-                    )
-                );
-                orphan_count++;
-              }
-            } else {
-              std::cout << "This can't happen" << std::endl;
-              // TODO: You sure about that bro?
-              // FIXME: Throw an exception here rather than printing to stdout
+          sqlite3_stmt* stm = metadata->prepare(query);
+          if (sqlite3_step(stm) == SQLITE_ROW &&
+              sqlite3_column_count(stm) > 0) {
+            int count = sqlite3_column_int(stm, 0);
+            if (count == 0) {
+              fixes.emplace_back(
+                  // TODO: Consider making an OrphanedMultipartFix class.
+                  // OrphanedOjectsFix works fine, but the messaging might
+                  // be slightly misleading ("orphaned object: uuid-n ..."
+                  // vs. what would be "orhpaned multipart part: ...")
+                  std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
+              );
+              orphan_count++;
             }
-            sqlite3_finalize(stm);
           } else {
-            std::cout << "This shouldn't happen" << std::endl;
-            // TODO: What?  Seriously?  Do better with the error handling.
-            // FIXME: Throw an exception here rather than printing to stdout
+            // This can't happen ("SELECT COUNT(...)" is _always_ going
+            // to give us one row with one column...)
+            const char* err = sqlite3_errmsg(metadata->handle);
+            sqlite3_finalize(stm);
+            throw std::runtime_error(err);
           }
+          sqlite3_finalize(stm);
         } else {
           // This is something else
           fixes.emplace_back(

@@ -97,5 +97,11 @@ int main(int argc, char* argv[]) {
     log_level = Check::LogLevel::VERBOSE;
   }
 
-  return run_checks(path_root, log_level, options_map.count("fix") > 0) ? 0 : 1;
+  try {
+    return run_checks(path_root, log_level, options_map.count("fix") > 0) ? 0
+                                                                          : 1;
+  } catch (std::runtime_error& ex) {
+    std::cerr << "Runtime error: " << ex.what() << std::endl;
+    return 1;
+  }
 }

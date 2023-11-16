@@ -27,21 +27,14 @@ std::string MetadataSchemaVersionFix::to_string() const {
 }
 
 bool MetadataSchemaVersionCheck::do_check() {
-  std::string query = "PRAGMA user_version;";
   int version = 0;
-  int rc = 0;
-  sqlite3_stmt* stm;
-  rc = metadata->prepare(query, &stm);
-  if (rc != SQLITE_OK) {
-    return 1;
-  }
-  rc = sqlite3_step(stm);
-  if (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
+  sqlite3_stmt* stm = metadata->prepare("PRAGMA user_version;");
+  if (sqlite3_step(stm) == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
     version = sqlite3_column_int(stm, 0);
   } else {
-    // FIXME: this should probably raise an exception (at the
-    // very least we shouldn't be printing anything directly here)
-    std::cout << "Error" << sqlite3_errmsg(metadata->handle) << std::endl;
+    const char* err = sqlite3_errmsg(metadata->handle);
+    sqlite3_finalize(stm);
+    throw std::runtime_error(err);
   }
   sqlite3_finalize(stm);
   log_verbose("Got schema version " + std::to_string(version));

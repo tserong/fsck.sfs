@@ -37,15 +37,9 @@ bool OrphanedMetadataCheck::do_check() {
   std::string query =
       "SELECT object_id, id FROM versioned_objects WHERE object_id IS NOT "
       "NULL;";
-  int rc = 0;
-  sqlite3_stmt* stm;
+  sqlite3_stmt* stm = metadata->prepare(query);
 
-  rc = metadata->prepare(query, &stm);
-  if (rc != SQLITE_OK) {
-    return rc;
-  }
-
-  rc = sqlite3_step(stm);
+  int rc = sqlite3_step(stm);
   while (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};

@@ -14,12 +14,13 @@
 #include <filesystem>
 #include <iostream>
 
-Database::Database(const std::filesystem::path& _db) : db(_db) {
+Database::Database(const std::filesystem::path& _db)
+    : db(_db), handle(nullptr) {
   int rc = sqlite3_open(db.string().c_str(), &handle);
   if (rc != SQLITE_OK) {
-    std::cout << "failed to open db" << std::endl;
+    const char* err = sqlite3_errmsg(handle);
     sqlite3_close(handle);
-    // FIXME: throw exception
+    throw std::runtime_error(err);
   }
 }
 
@@ -27,16 +28,14 @@ Database::~Database() {
   sqlite3_close(handle);
 }
 
-int Database::prepare(const std::string& query, sqlite3_stmt** stm) const {
-  int rc = 0;
+sqlite3_stmt* Database::prepare(const std::string& query) const {
+  sqlite3_stmt* stm;
   const char* unused = 0;
-  rc = sqlite3_prepare(handle, query.c_str(), query.length(), stm, &unused);
-  if (rc != SQLITE_OK) {
-    // FIXME: either throw an exception or log to stderr
-    std::cout << "error while prepare: " << rc << std::endl;
-    std::cout << query << std::endl;
+  if (sqlite3_prepare(handle, query.c_str(), query.length(), &stm, &unused) !=
+      SQLITE_OK) {
+    throw std::runtime_error(sqlite3_errmsg(handle));
   }
-  return rc;
+  return stm;
 }
 
 /* Count in Table - Count number of rows in named table where the condition
@@ -55,10 +54,7 @@ int Database::count_in_table(
   const char* unused = 0;
   rc = sqlite3_prepare(handle, query.c_str(), query.length(), &stm, &unused);
   if (rc != SQLITE_OK) {
-    // FIXME: either throw an exception or log to stderr
-    std::cout << "error while prepare: " << rc << std::endl;
-    std::cout << query << std::endl;
-    return 0;
+    throw std::runtime_error(sqlite3_errmsg(handle));
   }
   rc = sqlite3_step(stm);
   if (rc == SQLITE_ROW && sqlite3_column_count(stm) > 0) {
@@ -84,10 +80,7 @@ std::vector<std::string> Database::select_from_table(
   std::vector<std::string> result;
   rc = sqlite3_prepare(handle, query.c_str(), query.length(), &stm, &unused);
   if (rc != SQLITE_OK) {
-    // FIXME: either throw an exception or log to stderr
-    std::cout << "error while prepare: " << rc << std::endl;
-    std::cout << query << std::endl;
-    return result;
+    throw std::runtime_error(sqlite3_errmsg(handle));
   }
   do {
     rc = sqlite3_step(stm);

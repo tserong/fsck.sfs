@@ -29,7 +29,7 @@ class Database {
   Database(const std::filesystem::path& _db);
   ~Database();
 
-  int prepare(const std::string& query, sqlite3_stmt** stm) const;
+  sqlite3_stmt* prepare(const std::string& query) const;
 
   int count_in_table(const std::string& table, const std::string& condition)
       const;
