@@ -26,31 +26,20 @@
 #include "checks.h"
 
 class OrphanedObjectsFix : public Fix {
- private:
-  std::filesystem::path obj_path;  // relative to root_path
-
-  std::string to_string() const;
-
  public:
+  enum Type { OBJECT, MULTIPART, UNKNOWN };
   OrphanedObjectsFix(
-      const std::filesystem::path& root, const std::filesystem::path& object
-  );
+      Type t, const std::filesystem::path& root,
+      const std::filesystem::path& object
+  )
+      : Fix(root), obj_path(object), type(t) {}
   operator std::string() const { return to_string(); };
   void fix();
-};
 
-class UnexpectedFileFix : public Fix {
  private:
   std::filesystem::path obj_path;  // relative to root_path
-
+  Type type;
   std::string to_string() const;
-
- public:
-  UnexpectedFileFix(
-      const std::filesystem::path& root, const std::filesystem::path& object
-  );
-  operator std::string() const { return to_string(); };
-  void fix();
 };
 
 class OrphanedObjectsCheck : public Check {

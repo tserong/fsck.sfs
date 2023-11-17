@@ -16,57 +16,51 @@
 #include <iostream>
 #include <stack>
 
-OrphanedObjectsFix::OrphanedObjectsFix(
-    const std::filesystem::path& root, const std::filesystem::path& object
-)
-    : Fix(root), obj_path(object) {}
-
 void OrphanedObjectsFix::fix() {
-  // TODO: print a message of what was actually done when the fix was applied!
-  if (!std::filesystem::exists(
+  try {
+    if (!std::filesystem::exists(
+            root_path / "lost+found" / obj_path.parent_path()
+        )) {
+      std::filesystem::create_directories(
           root_path / "lost+found" / obj_path.parent_path()
-      )) {
-    std::filesystem::create_directories(
-        root_path / "lost+found" / obj_path.parent_path()
+      );
+    }
+
+    std::filesystem::rename(
+        root_path / obj_path, root_path / "lost+found" / obj_path
     );
-  }
+    // FIXME: Integrate with log level
+    std::cout << "  Moved " << obj_path.string() << " to lost+found"
+              << std::endl;
 
-  std::filesystem::rename(
-      root_path / obj_path, root_path / "lost+found" / obj_path
-  );
-
-  // remove directories above if no object remains
-  if (std::filesystem::is_empty(root_path / obj_path.parent_path())) {
-    std::filesystem::remove(root_path / obj_path.parent_path());
-  }
-
-  if (std::filesystem::is_empty(
-          root_path / obj_path.parent_path().parent_path()
-      )) {
-    std::filesystem::remove(root_path / obj_path.parent_path().parent_path());
+    // remove directories above if no object remains
+    std::filesystem::path parent(root_path / obj_path.parent_path());
+    while (parent != root_path && is_empty(parent)) {
+      std::filesystem::remove(parent);
+      parent = parent.parent_path();
+    }
+  } catch (std::filesystem::filesystem_error& ex) {
+    // TODO: better error reporting?
+    // TODO: integrate with log level
+    std::cerr << "Error: " << ex.what() << std::endl;
   }
 }
 
 std::string OrphanedObjectsFix::to_string() const {
-  std::string oid = obj_path.string();
-  // TODO: this stripping is wrong, because it prints:
-  // orphaned object: 353e5262-d525-42bd-a43a-876a0938b4842.p at 35/3e/5262-d525-42bd-a43a-876a0938b484/2.p
-  // (note how the 2.p is smooshed onto the end of the UUID?)
-  boost::erase_all(oid, "/");
-  return "orphaned object: " + oid + " at " + obj_path.string();
-}
-
-UnexpectedFileFix::UnexpectedFileFix(
-    const std::filesystem::path& root, const std::filesystem::path& object
-)
-    : Fix(root), obj_path(object) {}
-
-void UnexpectedFileFix::fix() {
-  // TODO: do we really want to move unexpected files to lost+found?
-}
-
-std::string UnexpectedFileFix::to_string() const {
-  return "Found unexpected mystery file: " + obj_path.string();
+  std::string msg("Found ");
+  switch (type) {
+    case OBJECT:
+      msg += "orphaned object";
+      break;
+    case MULTIPART:
+      msg += "orphaned multipart part";
+      break;
+    case UNKNOWN:
+      msg += "unexpected file";
+      break;
+  }
+  msg += ": " + obj_path.string();
+  return msg;
 }
 
 bool OrphanedObjectsCheck::do_check() {
@@ -110,9 +104,9 @@ bool OrphanedObjectsCheck::do_check() {
                   "versioned_objects",
                   "object_id=\"" + uuid + "\" AND id=" + stem
               ) == 0) {
-            fixes.emplace_back(
-                std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
-            );
+            fixes.emplace_back(std::make_shared<OrphanedObjectsFix>(
+                OrphanedObjectsFix::OBJECT, root_path, rel.string()
+            ));
             orphan_count++;
           }
         } else if (name_is_numeric && entry.path().extension() == ".p") {
@@ -131,13 +125,9 @@ bool OrphanedObjectsCheck::do_check() {
               sqlite3_column_count(stm) > 0) {
             int count = sqlite3_column_int(stm, 0);
             if (count == 0) {
-              fixes.emplace_back(
-                  // TODO: Consider making an OrphanedMultipartFix class.
-                  // OrphanedOjectsFix works fine, but the messaging might
-                  // be slightly misleading ("orphaned object: uuid-n ..."
-                  // vs. what would be "orhpaned multipart part: ...")
-                  std::make_shared<OrphanedObjectsFix>(root_path, rel.string())
-              );
+              fixes.emplace_back(std::make_shared<OrphanedObjectsFix>(
+                  OrphanedObjectsFix::MULTIPART, root_path, rel.string()
+              ));
               orphan_count++;
             }
           } else {
@@ -146,10 +136,14 @@ bool OrphanedObjectsCheck::do_check() {
             throw std::runtime_error(sqlite3_errmsg(metadata->handle));
           }
         } else {
-          // This is something else
-          fixes.emplace_back(
-              std::make_shared<UnexpectedFileFix>(root_path, rel.string())
-          );
+          // It's something else (neither versioned object nor multipart part).
+          // Note that this once picked up a ".m" file, which is a combined
+          // multipart upload temp file, prior to it being moved to the final
+          // object.  No idea how I managed to hit that - it should be really
+          // difficult...
+          fixes.emplace_back(std::make_shared<OrphanedObjectsFix>(
+              OrphanedObjectsFix::UNKNOWN, root_path, rel.string()
+          ));
           orphan_count++;
         }
       }
