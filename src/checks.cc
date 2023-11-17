@@ -53,6 +53,9 @@ bool run_checks(
     const std::filesystem::path& path, Check::LogLevel log_level,
     bool should_fix
 ) {
+  if (log_level > Check::LogLevel::SILENT) {
+    std::cout << "Checking SFS store in " << path.string() << std::endl;
+  }
   bool all_checks_passed = true;
 
   std::vector<std::shared_ptr<Check>> checks;
