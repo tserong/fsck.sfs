@@ -71,29 +71,29 @@ bool run_checks(
       check->show();
     }
     if (!this_check_passed) {
+      if (should_fix) {
+        // Try to fix the issue if possible
+        // TODO: Consider adding a 'continue' here if we know the fix
+        // has succeeded, so we ultimately return success rather than
+        // failure if everything is fixed.
+        check->fix();
+      }
       all_checks_passed = false;
       if (check->is_fatal()) {
         // Don't do any more checks if this check failure is fatal.
-        // TODO: integrate check->fix() here (try the fix, re-run the
-        // check, reset the failure state) otherwise you're basically
-        // screwed if there's a fatal failure.
-        // Actually...  Should we try the fix first (before setting
-        // all_checks_passed = false), then if the fix succeeds assume
-        // the check succeeded?  Or if the fix succeeds, re-run the
-        // check?  Or just list what fixes were applied/attempted and
-        // still count the check as failed because it failed the first
-        // time, then leave it up to the user to re-run fsck if they
-        // want to verify everything is really cool after the fixes?
+        // The fix might not have worked, or might not be possible,
+        // so it's not safe to proceed further.
         break;
       }
     }
-    if (should_fix) {
-      check->fix();
-    }
   }
 
-  if (all_checks_passed && log_level > Check::LogLevel::SILENT) {
-    std::cout << "All checks passed." << std::endl;
+  if (log_level > Check::LogLevel::SILENT) {
+    if (all_checks_passed) {
+      std::cout << "All checks passed." << std::endl;
+    } else {
+      std::cout << "One or more checks failed." << std::endl;
+    }
   }
   return all_checks_passed;
 }
