@@ -20,10 +20,17 @@ ObjectIntegrityFix::ObjectIntegrityFix(
 )
     : Fix(root), obj_path(object), reason(_reason) {}
 
-void ObjectIntegrityFix::fix() {}
+void ObjectIntegrityFix::fix() {
+  // FIXME: Implement this (_Can_ we implement this?  I guess if the
+  // metadata reported a smaller file size than what was on disk, we could
+  // truncate the file on disk, but what if the metadata reported a larger
+  // file size?  And what about checksum failures?)
+  // FIXME: Integrate with log level
+  std::cout << "  Object integrity cannot be automatically fixed." << std::endl;
+}
 
 std::string ObjectIntegrityFix::to_string() const {
-  return "object data integrity check failed: " + obj_path.string() + "\n  " +
+  return "Object data integrity check failed: " + obj_path.string() + "\n  " +
          reason;
 }
 

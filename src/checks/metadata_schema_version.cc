@@ -19,7 +19,11 @@ MetadataSchemaVersionFix::MetadataSchemaVersionFix(
 )
     : Fix(path), schema_version(version) {}
 
-void MetadataSchemaVersionFix::fix() {}
+void MetadataSchemaVersionFix::fix() {
+  // FIXME: Integrate with log level
+  std::cout << "  Metadata schema version cannot be automatically fixed."
+            << std::endl;
+}
 
 std::string MetadataSchemaVersionFix::to_string() const {
   return "Wrong metadata schema version: " + std::to_string(schema_version) +

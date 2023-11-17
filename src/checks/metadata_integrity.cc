@@ -20,7 +20,11 @@ MetadataIntegrityFix::MetadataIntegrityFix(
 )
     : Fix(path), errors(_errors) {}
 
-void MetadataIntegrityFix::fix() {}
+void MetadataIntegrityFix::fix() {
+  // FIXME: Integrate with log level
+  std::cout << "  Metadata integrity cannot be automatically fixed."
+            << std::endl;
+}
 
 std::string MetadataIntegrityFix::to_string() const {
   std::string msg("Database integrity check failed:");

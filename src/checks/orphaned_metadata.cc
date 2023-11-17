@@ -23,10 +23,15 @@ OrphanedMetadataFix::OrphanedMetadataFix(
 )
     : Fix(root), obj_path(object) {}
 
-void OrphanedMetadataFix::fix() {}
+void OrphanedMetadataFix::fix() {
+  // FIXME: Implement this (is it safe to just delete the metadata that
+  // refers to an object that no longer exists?)
+  // FIXME: Integrate with log level
+  std::cout << "  Orphaned metadata fix not yet implemented." << std::endl;
+}
 
 std::string OrphanedMetadataFix::to_string() const {
-  return "orphaned metadata: " + obj_path.string();
+  return "Found orphaned metadata: " + obj_path.string();
 }
 
 bool OrphanedMetadataCheck::do_check() {
