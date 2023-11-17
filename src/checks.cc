@@ -74,6 +74,13 @@ bool run_checks(
         // TODO: integrate check->fix() here (try the fix, re-run the
         // check, reset the failure state) otherwise you're basically
         // screwed if there's a fatal failure.
+        // Actually...  Should we try the fix first (before setting
+        // all_checks_passed = false), then if the fix succeeds assume
+        // the check succeeded?  Or if the fix succeeds, re-run the
+        // check?  Or just list what fixes were applied/attempted and
+        // still count the check as failed because it failed the first
+        // time, then leave it up to the user to re-run fsck if they
+        // want to verify everything is really cool after the fixes?
         break;
       }
     }
