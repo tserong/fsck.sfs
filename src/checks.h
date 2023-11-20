@@ -17,7 +17,7 @@
 
 #include "sqlite.h"
 
-constexpr std::string_view DB_FILENAME = "s3gw.db";
+constexpr std::string_view DB_FILENAME = "sfs.db";
 
 /* Fix - This is an abstract datatype representing an executable action to fix
  * an incosistency in the filesystem or metadata database.
