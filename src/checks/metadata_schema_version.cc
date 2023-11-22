@@ -24,8 +24,9 @@ void MetadataSchemaVersionFix::fix() {
 }
 
 std::string MetadataSchemaVersionFix::to_string() const {
-  return "Wrong metadata schema version: " + std::to_string(schema_version) +
-         "; expected: " + std::to_string(EXPECTED_METADATA_SCHEMA_VERSION);
+  return "Wrong metadata schema version: got " +
+         std::to_string(schema_version) +
+         ", expected: " + std::to_string(EXPECTED_METADATA_SCHEMA_VERSION);
 }
 
 bool MetadataSchemaVersionCheck::do_check() {

@@ -42,6 +42,6 @@ class MetadataSchemaVersionCheck : public Check {
   virtual ~MetadataSchemaVersionCheck() override {}
 };
 
-const int EXPECTED_METADATA_SCHEMA_VERSION = 4;
+const int EXPECTED_METADATA_SCHEMA_VERSION = 5;
 
 #endif  // FSCK_SFS_SRC_CHECKS_METADATA_SCHEMA_VERSION_H__
