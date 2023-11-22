@@ -31,31 +31,17 @@ void Check::show() {
   for (std::shared_ptr<Fix> fix : fixes) {
     // TODO: figure out how to handle embedded newlines (see comment in
     // MetadataIntegrityFix::to_string())
-    std::cout << "  " << std::string(*fix) << std::endl;
+    Log::log("  " + std::string(*fix));
   }
 }
 
-bool Check::check(Check::LogLevel log_level) {
-  check_log_level = log_level;
-  if (log_level > SILENT) {
-    std::cout << "Checking " << check_name << "..." << std::endl;
-  }
+bool Check::check() {
+  Log::log("Checking " + check_name + "...");
   return do_check();
 }
 
-void Check::log_verbose(const std::string& msg) const {
-  if (check_log_level == VERBOSE) {
-    std::cout << "  " << msg << std::endl;
-  }
-}
-
-bool run_checks(
-    const std::filesystem::path& path, Check::LogLevel log_level,
-    bool should_fix
-) {
-  if (log_level > Check::LogLevel::SILENT) {
-    std::cout << "Checking SFS store in " << path.string() << std::endl;
-  }
+bool run_checks(const std::filesystem::path& path, bool should_fix) {
+  Log::log("Checking SFS store in " + path.string());
   bool all_checks_passed = true;
 
   std::vector<std::shared_ptr<Check>> checks;
@@ -66,10 +52,8 @@ bool run_checks(
   checks.emplace_back(std::make_shared<ObjectIntegrityCheck>(path));
 
   for (std::shared_ptr<Check> check : checks) {
-    bool this_check_passed = check->check(log_level);
-    if (log_level > Check::LogLevel::SILENT) {
-      check->show();
-    }
+    bool this_check_passed = check->check();
+    check->show();
     if (!this_check_passed) {
       if (should_fix) {
         // Try to fix the issue if possible
@@ -88,12 +72,10 @@ bool run_checks(
     }
   }
 
-  if (log_level > Check::LogLevel::SILENT) {
-    if (all_checks_passed) {
-      std::cout << "All checks passed." << std::endl;
-    } else {
-      std::cout << "One or more checks failed." << std::endl;
-    }
+  if (all_checks_passed) {
+    Log::log("All checks passed.");
+  } else {
+    Log::log("One or more checks failed.");
   }
   return all_checks_passed;
 }

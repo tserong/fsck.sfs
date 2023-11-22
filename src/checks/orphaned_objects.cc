@@ -29,9 +29,7 @@ void OrphanedObjectsFix::fix() {
     std::filesystem::rename(
         root_path / obj_path, root_path / "lost+found" / obj_path
     );
-    // FIXME: Integrate with log level
-    std::cout << "  Moved " << obj_path.string() << " to lost+found"
-              << std::endl;
+    Log::log("  Moved " + obj_path.string() + " to lost+found");
 
     // remove directories above if no object remains
     std::filesystem::path parent(root_path / obj_path.parent_path());
@@ -41,8 +39,7 @@ void OrphanedObjectsFix::fix() {
     }
   } catch (std::filesystem::filesystem_error& ex) {
     // TODO: better error reporting?
-    // TODO: integrate with log level
-    std::cerr << "Error: " << ex.what() << std::endl;
+    Log::log(std::string("  Error: ") + ex.what());
   }
 }
 
@@ -89,7 +86,7 @@ bool OrphanedObjectsCheck::do_check() {
         std::filesystem::path rel =
             std::filesystem::relative(cwd / entry.path(), root_path);
 
-        log_verbose("Checking file " + rel.string());
+        Log::log_verbose("Checking file " + rel.string());
 
         std::filesystem::path uuid_path =
             std::filesystem::relative(cwd, root_path);

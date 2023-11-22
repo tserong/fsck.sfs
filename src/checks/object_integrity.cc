@@ -25,8 +25,7 @@ void ObjectIntegrityFix::fix() {
   // metadata reported a smaller file size than what was on disk, we could
   // truncate the file on disk, but what if the metadata reported a larger
   // file size?  And what about checksum failures?)
-  // FIXME: Integrate with log level
-  std::cout << "  Object integrity cannot be automatically fixed." << std::endl;
+  Log::log("  Object integrity cannot be automatically fixed.");
 }
 
 std::string ObjectIntegrityFix::to_string() const {
@@ -50,7 +49,7 @@ bool ObjectIntegrityCheck::do_check() {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};
     std::string id{reinterpret_cast<const char*>(sqlite3_column_text(stm, 1))};
-    log_verbose("Checking object " + id + " (uuid: " + uuid + ")");
+    Log::log_verbose("Checking object " + id + " (uuid: " + uuid + ")");
     id.append(".v");
     std::string checksum{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 2))};

@@ -21,9 +21,7 @@ MetadataIntegrityFix::MetadataIntegrityFix(
     : Fix(path), errors(_errors) {}
 
 void MetadataIntegrityFix::fix() {
-  // FIXME: Integrate with log level
-  std::cout << "  Metadata integrity cannot be automatically fixed."
-            << std::endl;
+  Log::log("  Metadata integrity cannot be automatically fixed.");
 }
 
 std::string MetadataIntegrityFix::to_string() const {

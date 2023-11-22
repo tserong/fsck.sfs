@@ -26,8 +26,7 @@ OrphanedMetadataFix::OrphanedMetadataFix(
 void OrphanedMetadataFix::fix() {
   // FIXME: Implement this (is it safe to just delete the metadata that
   // refers to an object that no longer exists?)
-  // FIXME: Integrate with log level
-  std::cout << "  Orphaned metadata fix not yet implemented." << std::endl;
+  Log::log("  Orphaned metadata fix not yet implemented.");
 }
 
 std::string OrphanedMetadataFix::to_string() const {
@@ -49,7 +48,7 @@ bool OrphanedMetadataCheck::do_check() {
     std::string uuid{
         reinterpret_cast<const char*>(sqlite3_column_text(stm, 0))};
     std::string id{reinterpret_cast<const char*>(sqlite3_column_text(stm, 1))};
-    log_verbose("Checking object " + id + " (uuid: " + uuid + ")");
+    Log::log_verbose("Checking object " + id + " (uuid: " + uuid + ")");
     id.append(".v");
     // first/second/fname logic lifted from sfs's UUIDPath class
     std::filesystem::path first = uuid.substr(0, 2);

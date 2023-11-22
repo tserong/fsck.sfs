@@ -88,18 +88,16 @@ int main(int argc, char* argv[]) {
     );
   }
 
-  Check::LogLevel log_level = Check::LogLevel::NORMAL;
   if (options_map.count("quiet") > 0) {
     // TODO: fix discrepancy between terms "quiet" and "silent"?
-    log_level = Check::LogLevel::SILENT;
+    Log::level = Log::SILENT;
   }
   if (options_map.count("verbose") > 0) {
-    log_level = Check::LogLevel::VERBOSE;
+    Log::level = Log::VERBOSE;
   }
 
   try {
-    return run_checks(path_root, log_level, options_map.count("fix") > 0) ? 0
-                                                                          : 1;
+    return run_checks(path_root, options_map.count("fix") > 0) ? 0 : 1;
   } catch (std::runtime_error& ex) {
     std::cerr << "Runtime error: " << ex.what() << std::endl;
     return 1;
